@@ -3,7 +3,7 @@
 #ifndef _SysInfo_SysInfo_h
 #define _SysInfo_SysInfo_h
 
-#include <Functions4U/Functions4U/Functions4U.h>
+#include <Functions4U/Functions4U.h>
 
 namespace Upp {
 
