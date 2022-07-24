@@ -2,7 +2,7 @@ description "OS, hardware and Desktop handling functions\377B44,169,203";
 
 uses
 	Core,
-	Functions4U;
+	Functions4U/Functions4U;
 
 library(WIN32) "ws2_32 psapi gdi32 vfw32 oleaut32 iphlpapi PowrProf netapi32 wbemuuid";
 
@@ -28,6 +28,8 @@ file
 	src.tpp,
 	srcimp.tpp,
 	SysInfo.t,
-	Copying;
+	Copying,
+	Crash.cpp,
+	Crash.h;
 
  spellcheck_comments "EN-GB"

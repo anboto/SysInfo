@@ -25,7 +25,7 @@
 
 namespace Upp {
 
-#define TFILE <SysInfo/SysInfo.t>
+#define TFILE <SysInfo/SysInfo/SysInfo.t>
 #include <Core/t.h>
 
 #ifdef COMPILER_MSC
