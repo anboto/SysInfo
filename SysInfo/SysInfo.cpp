@@ -63,7 +63,11 @@ bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], Stri
 		return false;
 	}
 	
-	BSTR bstrNamespace = SysAllocString((const OLECHAR *)nameSpace.ToWString().Begin());
+	BSTR bstrNamespace;
+	if (!BSTRSet(nameSpace, bstrNamespace)) {
+		CoUninitialize();
+		return false;
+	}
 	IWbemServices* pWbemServices = NULL;
 	if (pIWbemLocator->ConnectServer(bstrNamespace, NULL, NULL, NULL, 0, NULL, NULL,
 		&pWbemServices) != S_OK) {
@@ -84,19 +88,23 @@ bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], Stri
 	IEnumWbemClassObject* pEnumerator = NULL;
 	String query;
 	query << "Select * from " << system;
-	WCHAR wquery[1024*sizeof(WCHAR)];
-	MultiByteToWideChar(CP_UTF8, 0, query, -1, wquery, sizeof(wquery)/sizeof(wquery[0]));
-	BSTR strQuery = SysAllocString(wquery);
-	BSTR strQL = SysAllocString(L"WQL");
-	hRes = pWbemServices->ExecQuery(strQL, strQuery, WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+	
+	BSTR bstrQuery, bstrQL;
+	if (!BSTRSet(query, bstrQuery) || !BSTRSet("WQL", bstrQL)) {
+		pWbemServices->Release();
+        pIWbemLocator->Release();   
+		CoUninitialize();
+		return false;
+	}
+	hRes = pWbemServices->ExecQuery(bstrQL, bstrQuery, WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
 	if (hRes != S_OK) {
         pWbemServices->Release();
         pIWbemLocator->Release();     
         CoUninitialize();
         return false;
     }
-	SysFreeString(strQuery);
-	SysFreeString(strQL);
+	SysFreeString(bstrQuery);
+	SysFreeString(bstrQL);
 
     IWbemClassObject *pClassObject;
     ULONG uReturn = 0;
@@ -126,8 +134,16 @@ bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], Stri
 		for (int col = 0; col < data.GetCount(); ++col) {
 			VARIANT vProp;
 			VariantInit(&vProp);
-			BSTR strClassProp = SysAllocString((const OLECHAR *)data[col].ToWString().Begin());
-	        hRes = pClassObject->Get(strClassProp, 0, &vProp, 0, 0);
+			BSTR bstrClassProp;
+			if (!BSTRSet(data[col], bstrClassProp)) {
+				pWbemServices->Release();
+		        pIWbemLocator->Release(); 
+		        pEnumerator->Release(); 
+		        pClassObject->Release();  
+				CoUninitialize();
+				return false;
+			}
+	        hRes = pClassObject->Get(bstrClassProp, 0, &vProp, 0, 0);
 	        if(hRes != S_OK){
 		        pWbemServices->Release();
 		        pIWbemLocator->Release(); 
@@ -136,7 +152,7 @@ bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], Stri
 		        CoUninitialize();
 		        return false;
 		    }
-			SysFreeString(strClassProp);        
+			SysFreeString(bstrClassProp);        
 			ret[col]->Add(GetVARIANT(vProp));
 			VariantClear(&vProp);
 			rt = true;
