@@ -8,7 +8,7 @@
 #if defined(PLATFORM_WIN32) 
 #include <psapi.h>
 #include <rtcapi.h>
-#include <Shellapi.h>
+#include <shellapi.h>
 	#ifdef COMPILER_MSC
 	#include <verrsrc.h>
 	#endif
