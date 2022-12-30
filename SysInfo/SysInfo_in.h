@@ -9,9 +9,9 @@
 
 #if defined(PLATFORM_WIN32) 
 	#include <shellapi.h>
-	#include <Tlhelp32.h>
+	#include <tlhelp32.h>
 	#include <psapi.h>
-	#include <Winioctl.h>
+	#include <winioctl.h>
 	#define CY tagCY
 	// To compile in MinGW you will probably need to get files Rpcsal.h, WbemCli.h, WbemProv.h 
 	// and for sure you will need wbemuuid.lib, even deleting libwbemuuid.a, as it is uncomplete
@@ -21,10 +21,10 @@
 	#include <winnls.h> 
 	#include <vfw.h>
 	typedef ACCESS_MASK REGSAM;
-	#include <PowrProf.h>
+	#include <powrprof.h>
 	#include <lm.h>
 	#include <winsock2.h>
-	#include <Ws2tcpip.h>
+	#include <ws2tcpip.h>
 	#ifndef PROCESS_QUERY_LIMITED_INFORMATION
 	#define PROCESS_QUERY_LIMITED_INFORMATION 0x1000
 	#endif	
