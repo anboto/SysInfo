@@ -446,6 +446,7 @@ bool GetVideoInfo(Array <Value> &name, Array <Value> &description, Array <Value>
 	return true;
 }
 
+#ifdef DEPRECATED		// GetWMIInfo("Win32_Product" is very slow, it doesn't always return a complete list, and it does silent repairs
 bool GetPackagesInfo(Array <Value> &name, Array <Value> &version, Array <Value> &vendor, 
 		Array <Value> &installDate, Array <Value> &caption, Array <Value> &description, Array <Value> &state)
 {
@@ -486,6 +487,7 @@ bool GetPackagesInfo(Array <Value> &name, Array <Value> &version, Array <Value> 
 	}
 	return true;
 }
+#endif
 
 double GetCpuTemperature() {
 	Value data;

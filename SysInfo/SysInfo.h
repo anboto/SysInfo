@@ -34,7 +34,7 @@ struct NetAdapter : DeepCopyOption<NetAdapter> {
 	NetAdapter() {}
 };
 
-Upp::Array <NetAdapter> GetAdapterInfo();
+Array<NetAdapter> GetAdapterInfo();
 
 bool GetNetworkInfo(String &name, String &domain, String &ip4, String &ip6);
 
@@ -44,8 +44,10 @@ bool IsPortFree(int port);
 #if defined(PLATFORM_WIN32) 
 bool GetVideoInfo(Upp::Array <Value> &name, Upp::Array <Value> &description, Upp::Array <Value> &videoProcessor, 
 				  Upp::Array <Value> &ram, Upp::Array <Value> &videoMode);
+#ifdef DEPRECATED
 bool GetPackagesInfo(Upp::Array <Value> &name, Upp::Array <Value> &version, Upp::Array <Value> &vendor, 
 			Upp::Array <Value> &installDate, Upp::Array <Value> &caption, Upp::Array <Value> &description, Upp::Array <Value> &state);
+#endif
 #endif
 
 String GetHDSerial();
