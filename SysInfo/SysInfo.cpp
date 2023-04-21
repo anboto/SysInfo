@@ -448,16 +448,17 @@ bool GetVideoInfo(Array <Value> &name, Array <Value> &description, Array <Value>
 
 #ifdef DEPRECATED		// GetWMIInfo("Win32_Product" is very slow, it doesn't always return a complete list, and it does silent repairs
 bool GetPackagesInfo(Array <Value> &name, Array <Value> &version, Array <Value> &vendor, 
-		Array <Value> &installDate, Array <Value> &caption, Array <Value> &description, Array <Value> &state)
+		Array <Value> &installDate, Array <Value> &caption, Array <Value> &description, Array <Value> &state, Array <Value> &path)
 {
-	Array <Value> *res[7];
+	Array <Value> *res[8];
 	res[0] = &name;
 	res[1] = &version;
 	res[2] = &vendor;
 	res[3] = &installDate;	
 	res[4] = &caption;	
 	res[5] = &description;	
-	res[6] = &state;	
+	res[6] = &state;
+	res[7] = &path;
 	Vector <String> data;
 	data.Add("Name");
 	data.Add("Version");
@@ -466,6 +467,7 @@ bool GetPackagesInfo(Array <Value> &name, Array <Value> &version, Array <Value> 
 	data.Add("Caption");
 	data.Add("Description");
 	data.Add("InstallState");
+	data.Add("InstallLocation");
 	if (!GetWMIInfo("Win32_Product", data, res))
 		return false;
 	

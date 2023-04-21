@@ -11,6 +11,23 @@ void Test()
 {
 	UppLog() << "\n" << "SysInfo functions demo";
 	
+	/*{
+		UppLog() << "\n" << "\nInstalled software";
+		
+		Array<Value> name, version, vendor, installDate, caption, description, state, path;
+		GetPackagesInfo(name, version, vendor, installDate, caption, description, state, path);
+		for (int i = 0; i < name.size(); ++i) {
+			UppLog() << "\n" << name[i];
+			UppLog() << "\n\tVersion: " << version[i];				
+			UppLog() << "\n\tVendor: " << vendor[i];				
+			UppLog() << "\n\tInstallDate: " << installDate[i];				
+			UppLog() << "\n\tCaption: " << caption[i];				
+			UppLog() << "\n\tDescription: " << description[i];				
+			UppLog() << "\n\tState: " << state[i];				
+			UppLog() << "\n\tPath: " << path[i];				
+		}
+	}*/
+	
 	UppLog() << "\n" << "\nSpecial folders";
 	UppLog() << "\n" << Format("Desktop:          %s", GetDesktopFolder());
 	UppLog() << "\n" << Format("Programs:         %s", GetProgramsFolder());

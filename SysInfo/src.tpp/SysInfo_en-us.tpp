@@ -62,11 +62,14 @@ screen resolution and number of colors&]
 [s6; Only available in Windows&]
 [s3; &]
 [s4;%- &]
-[s5;:GetPackagesInfo`(Array`<Value`>`&`,Array`<Value`>`&`,Array`<Value`>`&`,Array`<Value`>`&`,Array`<Value`>`&`,Array`<Value`>`&`,Array`<Value`>`&`):%- [@(0.0.255) b
-ool]_[* GetPackagesInfo]([_^Array^ Array]_<[_^Value^ Value]>_`&[*@3 name], 
-Array_<Value>_`&[*@3 version], Array_<Value>_`&[*@3 vendor], Array_<Value>_`&[*@3 insta
-llDate], Array_<Value>_`&[*@3 caption], Array_<Value>_`&[*@3 description], 
-Array_<Value>_`&[*@3 state])&]
+[s5;:Upp`:`:GetPackagesInfo`(Upp`:`:Array`&`,Upp`:`:Array`&`,Upp`:`:Array`&`,Upp`:`:Array`&`,Upp`:`:Array`&`,Upp`:`:Array`&`,Upp`:`:Array`&`,Upp`:`:Array`&`):%- [@(0.0.255) b
+ool] [* GetPackagesInfo](Upp[@(0.0.255) `::]Array<Value>[@(0.0.255) `&] 
+[*@3 name], Upp[@(0.0.255) `::]Array<Value>[@(0.0.255) `&] [*@3 version], 
+Upp[@(0.0.255) `::]Array<Value>[@(0.0.255) `&] [*@3 vendor], Upp[@(0.0.255) `::]Array<Value
+>[@(0.0.255) `&] [*@3 installDate], Upp[@(0.0.255) `::]Array<Value>[@(0.0.255) `&] 
+[*@3 caption], Upp[@(0.0.255) `::]Array<Value>[@(0.0.255) `&] [*@3 description], 
+Upp[@(0.0.255) `::]Array<Value>[@(0.0.255) `&] [*@3 state], Upp[@(0.0.255) `::]Array<Value>
+[@(0.0.255) `&] [*@3 path])&]
 [s2; If true gets information about installed software:&]
 [s2;%- [*@3 name]&]
 [s2;%- [*@3 version]&]
@@ -81,9 +84,11 @@ Array_<Value>_`&[*@3 state])&]
 [s0;l640; `- `"Advertised`"&]
 [s0;l640; `- `"Absent`"&]
 [s0;l640; `- `"Ok`"&]
-[s6; Only available in Windows. Now deprecated&]
-[s3; &]
-[s4;%- &]
+[s0;l288;%- [*@3 path]&]
+[s2; Only available in Windows. Now deprecated, because it is very 
+slow.&]
+[s3;%- &]
+[s4; &]
 [s5;:GetCpuTemperature`(`):%- [@(0.0.255) double]_[* GetCpuTemperature]()&]
 [s2; Returns CPU temperature in degrees Celsius.&]
 [s6; It does not work in all computers.&]

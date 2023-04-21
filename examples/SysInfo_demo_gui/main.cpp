@@ -63,10 +63,11 @@ void SpecialFolders::ButInstalledSoftware_Push() {
 	SoftwareInstalled.AddColumn("Caption", 60);
 	SoftwareInstalled.AddColumn("Description", 60);
 	SoftwareInstalled.AddColumn("Install State", 10);
-	Array <Value> name, version, vendor, caption, installDate, description, state;
-	if (GetPackagesInfo(name, version, vendor, installDate, caption, description, state)) {
+	SoftwareInstalled.AddColumn("Path", 10);
+	Array <Value> name, version, vendor, caption, installDate, description, state, path;
+	if (GetPackagesInfo(name, version, vendor, installDate, caption, description, state, path)) {
 		for (int i = 0; i < name.GetCount(); ++i) 
-			SoftwareInstalled.Add(name[i], version[i], vendor[i], installDate[i], caption[i], description[i], state[i]);
+			SoftwareInstalled.Add(name[i], version[i], vendor[i], installDate[i], caption[i], description[i], state[i], path[i]);
 	}
 	ButInstalledSoftware.SetLabel("Get installed software list");
 #endif

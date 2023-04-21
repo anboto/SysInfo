@@ -46,7 +46,7 @@ bool GetVideoInfo(Upp::Array <Value> &name, Upp::Array <Value> &description, Upp
 				  Upp::Array <Value> &ram, Upp::Array <Value> &videoMode);
 #ifdef DEPRECATED
 bool GetPackagesInfo(Upp::Array <Value> &name, Upp::Array <Value> &version, Upp::Array <Value> &vendor, 
-			Upp::Array <Value> &installDate, Upp::Array <Value> &caption, Upp::Array <Value> &description, Upp::Array <Value> &state);
+			Upp::Array <Value> &installDate, Upp::Array <Value> &caption, Upp::Array <Value> &description, Upp::Array <Value> &state, Upp::Array <Value> &path);
 #endif
 #endif
 
