@@ -39,7 +39,7 @@ CrashHandler::CrashHandler() {
 
 	std::set_new_handler(NewHandler);
 	std::set_terminate(TerminateHandler);
-	std::set_unexpected(UnexpectedHandler);
+	//std::set_unexpected(UnexpectedHandler);
 
 	signal(SIGABRT, SigabrtHandler);  
 	signal(SIGINT, SigintHandler);     
@@ -73,9 +73,9 @@ void __cdecl CrashHandler::TerminateHandler() {
 	Panic("Terminate exception");
 }
 
-void __cdecl CrashHandler::UnexpectedHandler() {
+/*void __cdecl CrashHandler::UnexpectedHandler() {
  	Panic("Unexpected exception");
-}
+}*/
 
 void __cdecl CrashHandler::PureCallHandler() {
 	Panic("Pure virtual function call");

@@ -6,7 +6,13 @@
 #include <Core/Core.h>
 //#include "SysInfo_in.h"
 
+
 namespace Upp {
+
+#ifdef __GNUC__
+#define __cdecl __attribute__((__cdecl__))
+#endif
+
 
 class CrashHandler {
 public:
@@ -23,7 +29,7 @@ private:
 #pragma GCC diagnostic ignored "-Wattributes"
 #endif
     static void __cdecl TerminateHandler();
-    static void __cdecl UnexpectedHandler();
+    //static void __cdecl UnexpectedHandler();
 
     static void __cdecl PureCallHandler();
 
