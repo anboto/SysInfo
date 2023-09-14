@@ -202,7 +202,14 @@ void GetSystemInfo(String &manufacturer, String &productName, String &version, i
 		productName = FromSystemCharset(GetWinRegString("Model", "SOFTWARE\\Microsoft\\PCHealth\\HelpSvc\\OEMInfo", HKEY_LOCAL_MACHINE));
 	
 	version = FromSystemCharset(GetWinRegString("SystemVersion", "HARDWARE\\DESCRIPTION\\System\\BIOS", HKEY_LOCAL_MACHINE));
-	numberOfProcessors = atoi(GetEnv("NUMBER_OF_PROCESSORS"));
+	
+	Value vnproc;
+	numberOfProcessors = Null;
+	if (GetWMIInfo("Win32_ComputerSystem", "NumberOfLogicalProcessors", vnproc)) 
+		numberOfProcessors = ScanInt(vnproc.ToString());
+	if (IsNull(numberOfProcessors))
+		numberOfProcessors = atoi(GetEnv("NUMBER_OF_PROCESSORS"));
+	
 	Value vmbSerial;
 	if (GetWMIInfo("Win32_BaseBoard", "SerialNumber", vmbSerial)) 
 		mbSerial = Trim(vmbSerial.ToString());	
