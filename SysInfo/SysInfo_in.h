@@ -72,6 +72,9 @@
 #endif
 
 #define _Browser_Browser_h
+#ifdef COUNT		// Problem with X1.h
+#undef COUNT
+#endif
 #include "SysInfo.h"
 #ifdef _WIN32
 #include "OSwin.h"
