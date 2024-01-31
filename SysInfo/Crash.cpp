@@ -27,7 +27,7 @@ namespace Upp {
 CrashHandler::CrashHandler() {
 #if defined(PLATFORM_WIN32)
 	_clearfp();
-	_controlfp(_controlfp(0, 0) & ~(_EM_INVALID | _EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
+	fp = _controlfp(_controlfp(0, 0) & ~(_EM_INVALID | _EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
 
 	SetUnhandledExceptionFilter(UnhandledHandler);    
 	_set_purecall_handler(PureCallHandler);    
@@ -49,15 +49,19 @@ CrashHandler::CrashHandler() {
 	signal(SIGSEGV, SigsegvHandler); 
 	
 	//InstallPanicMessageBox(PanicMessage);
+	enabled = true;
+	fp = 0;
 }
 
 #if defined(PLATFORM_WIN32)	
 LONG WINAPI CrashHandler::UnhandledHandler(EXCEPTION_POINTERS *exceptionPtrs) { 
+	if (!GetCrashHandler().IsEnabled())
+		return EXCEPTION_CONTINUE_EXECUTION;
 	Panic("Default exception");
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
-void __cdecl CrashHandler::SEHHandler(unsigned u, EXCEPTION_POINTERS* p) {
+/*void __cdecl CrashHandler::SEHHandler(unsigned u, EXCEPTION_POINTERS* p) {
 	switch(u) {
 		case EXCEPTION_FLT_DIVIDE_BY_ZERO:
 		case EXCEPTION_INT_DIVIDE_BY_ZERO:
@@ -66,10 +70,12 @@ void __cdecl CrashHandler::SEHHandler(unsigned u, EXCEPTION_POINTERS* p) {
 	default:
 		Panic("SEH exception");	
 	}
-}
+}*/
 #endif 
 
 void __cdecl CrashHandler::TerminateHandler() {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("Terminate exception");
 }
 
@@ -78,11 +84,15 @@ void __cdecl CrashHandler::TerminateHandler() {
 }*/
 
 void __cdecl CrashHandler::PureCallHandler() {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("Pure virtual function call");
 }
 
 void __cdecl CrashHandler::InvalidParameterHandler(const wchar_t* expression, const wchar_t *function, 
 	const wchar_t* file, unsigned int line, uintptr_t) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	if (line == 0)
 		Panic("Invalid parameter");
 	else
@@ -91,32 +101,59 @@ void __cdecl CrashHandler::InvalidParameterHandler(const wchar_t* expression, co
 }
 
 void __cdecl CrashHandler::NewHandler() {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("Not enough memory available");
 }
 
 void CrashHandler::SigabrtHandler(int) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("SIGABRT: Process has aborted");
 }
 
 void CrashHandler::SigfpeHandler(int) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("SIGFPE: Floating point error");
 }
 
 void CrashHandler::SigillHandler(int) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("SIGILL: Executable code seems corrupted");
 }
 
 void CrashHandler::SigintHandler(int) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("SIGINT: Process has been asked to terminate by user");
 }
 
 void CrashHandler::SigsegvHandler(int) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("SIGSEGV: Trying to read or write from/to a memory area that your process does not have access to");
 }
 
 void CrashHandler::SigtermHandler(int) {
+	if (!GetCrashHandler().IsEnabled())
+		return;
 	Panic("SIGTERM: Process has been asked to terminate by other application");
 }
 
+void CrashHandler::Enable() {
+	enabled = true;
+}
 
+void CrashHandler::Disable() {
+	enabled = false;
+}
+	
+CrashHandler &GetCrashHandler() {
+	static CrashHandler clss;
+	return clss;
+}
+	
+	
 }

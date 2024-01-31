@@ -4,7 +4,6 @@
 #define _CrashHandler_Crash_h_
 
 #include <Core/Core.h>
-//#include "SysInfo_in.h"
 
 
 namespace Upp {
@@ -16,13 +15,17 @@ namespace Upp {
 
 class CrashHandler {
 public:
-    CrashHandler();
+    CrashHandler(); 		
     virtual ~CrashHandler() {};
 
+	void Enable();
+	void Disable();
+	bool IsEnabled()	{return enabled;}
+	
 private:
 #if defined(PLATFORM_WIN32) 
     static LONG WINAPI UnhandledHandler(EXCEPTION_POINTERS *p);
-    static void __cdecl SEHHandler(unsigned u, EXCEPTION_POINTERS* p);
+    //static void __cdecl SEHHandler(unsigned u, EXCEPTION_POINTERS* p);
 #endif
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -46,7 +49,12 @@ private:
     static void SigillHandler(int);
     static void SigsegvHandler(int);
     static void SigtermHandler(int);
+    
+    bool enabled;
+    unsigned int fp;
 };
+
+CrashHandler &GetCrashHandler();
 
 }
 
