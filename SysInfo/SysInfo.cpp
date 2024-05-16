@@ -108,7 +108,7 @@ bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], Stri
 
     IWbemClassObject *pClassObject;
     ULONG uReturn = 0;
-    int row = 0;
+    //int row = 0;
     bool rt = false;
 	while (pEnumerator) {
         hRes = pEnumerator->Next(LONG(WBEM_INFINITE), 1, &pClassObject, &uReturn);
@@ -157,7 +157,7 @@ bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], Stri
 			VariantClear(&vProp);
 			rt = true;
 		}
-		row++;
+		//row++;
     }
 	pIWbemLocator->Release();
 	pWbemServices->Release();
@@ -352,7 +352,8 @@ Array <NetAdapter> GetAdapterInfo() {
    		PIP_ADAPTER_UNICAST_ADDRESS_XP pGateway = pAdd->FirstUnicastAddress;
 #endif
    		if (pGateway != NULL) {
-   			for (int i = 0; pGateway != NULL; i++) {
+   			//for (int i = 0; pGateway != NULL; i++) {
+   			while (pGateway != NULL) {
    				if (pGateway->Address.lpSockaddr->sa_family == AF_INET) {
            			sockaddr_in *sa_in = reinterpret_cast<sockaddr_in *>(pGateway->Address.lpSockaddr);
 					adapter.gatewayip4 = inet_ntop4(reinterpret_cast<const unsigned char *>(&(sa_in->sin_addr)));
@@ -365,7 +366,8 @@ Array <NetAdapter> GetAdapterInfo() {
    		}
 		PIP_ADAPTER_UNICAST_ADDRESS pUnicast = pAdd->FirstUnicastAddress;
     	if (pUnicast != NULL) {
-          	for (int i = 0; pUnicast != NULL; i++) {
+          	//for (int i = 0; pUnicast != NULL; i++) {
+          	while (pUnicast != NULL) {
            		if (pUnicast->Address.lpSockaddr->sa_family == AF_INET) {
            			sockaddr_in *sa_in = reinterpret_cast<sockaddr_in *>(pUnicast->Address.lpSockaddr);
 					adapter.ip4 = inet_ntop4(reinterpret_cast<const unsigned char *>(&(sa_in->sin_addr)));
