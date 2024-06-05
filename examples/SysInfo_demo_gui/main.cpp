@@ -122,6 +122,8 @@ void SystemInfo::Fill() {
 		TextIp6 = ip6;
 	}
 	
+	Textusername = GetUserName();
+	
 	int memoryLoad;
 	uint64 totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual;
 	if (GetMemoryInfo(memoryLoad, totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual)) {
@@ -279,7 +281,7 @@ struct SOptDropGrid: public DropGrid {
 		GetList().SetCtrl(1, 0, st); 
 		++row;
 		Option *po;
-		for(int i = 0; i < sizeof(styles)/sizeof(styles[0]); ++i, row++) {
+		for(int i = 0; i < int(sizeof(styles)/sizeof(styles[0])); ++i, row++) {
 			po = new Option; 
 			po->Set((stylesbits[i]&GetWindowLong((HWND)hwnd, GWL_STYLE) ? true : false)); 
 			po->SetLabel(styles[i]); 
@@ -292,7 +294,7 @@ struct SOptDropGrid: public DropGrid {
 		*st = "** Extendes styles **"; 
 		GetList().SetCtrl(row, 0, st); 
 		++row;
-		for(int i = 0; i < sizeof(exstyles)/sizeof(exstyles[0]); row++, ++i){
+		for(int i = 0; i < int(sizeof(exstyles)/sizeof(exstyles[0])); row++, ++i){
 			po = new Option; 
 			po->Set((stylesbits[i]&GetWindowLong((HWND)hwnd,GWL_EXSTYLE)) ? true : false); 
 			po->SetLabel(exstyles[i]);  
@@ -320,12 +322,12 @@ struct SOptDropGrid: public DropGrid {
 			return;
 		}
 		bool on = ((Option*)GetList().GetCtrl(0))->Get() == 1;
-		uint64 bits = GetWindowLong((HWND)hwnd, (rowind>3+sizeof(stylesbits)/sizeof(stylesbits[0])) ? GWL_EXSTYLE : GWL_STYLE);
+		uint64 bits = GetWindowLong((HWND)hwnd, (rowind>3 + int(sizeof(stylesbits)/sizeof(stylesbits[0]))) ? GWL_EXSTYLE : GWL_STYLE);
 		if(on)
 			SetBit(bits, bit);
 		else  
 			ClearBit(bits, bit);
-		SetWindowLong((HWND)hwnd, (rowind > 3 + sizeof(stylesbits)/sizeof(stylesbits[0])) ? GWL_EXSTYLE : GWL_STYLE, (LONG)bits);
+		SetWindowLong((HWND)hwnd, (rowind > 3 + int(sizeof(stylesbits)/sizeof(stylesbits[0]))) ? GWL_EXSTYLE : GWL_STYLE, (LONG)bits);
 		RedrawWindow(GetDesktopWindow(), 0, 0, RDW_INVALIDATE|RDW_ALLCHILDREN|RDW_FRAME|RDW_ERASE);
 		RedrawWindow((HWND)hwnd, 0, 0, RDW_INVALIDATE|RDW_ALLCHILDREN|RDW_FRAME|RDW_ERASE);
 	}
@@ -540,7 +542,7 @@ void MouseKeyboard::OnButKey() {
 	LaunchFile(fileTest);
 	{
 		TimeStop t;
-		uint64 windowId;
+		int64 windowId;
 		while(INT64_MAX == (windowId = GetWindowIdFromCaption("test.txt", false))) {
 			if (t.Elapsed() > 10000)
 				break;
@@ -560,7 +562,7 @@ void MouseKeyboard::OnButKey() {
 
 void MouseKeyboard::OnButMouse()
 {
-	uint64 wnd = GetWindowIdFromCaption("SysInfo", true);
+	int64 wnd = GetWindowIdFromCaption("SysInfo", true);
 	
 	if (wnd == -1) {
 		Exclamation("Window not found");

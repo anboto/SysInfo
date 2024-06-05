@@ -265,11 +265,37 @@ namespace Upp {
 //typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 //typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 
+
+
+
+typedef void (WINAPI * RtlGetVersion_) (OSVERSIONINFOEXW *);
+
+bool GetVersion2(RTL_OSVERSIONINFOEXW &os) {
+    HMODULE hMod;
+    RtlGetVersion_ RtlGetVersion;
+
+    hMod = LoadLibrary(TEXT("ntdll.dll"));
+    if (!hMod) 
+        return false;
+    
+    RtlGetVersion = (RtlGetVersion_)GetProcAddress(hMod, "RtlGetVersion");
+    if (!RtlGetVersion) {
+        FreeLibrary(hMod);
+        return false;
+    }
+    ZeroMemory(&os, sizeof (os));
+    os.dwOSVersionInfoSize = sizeof (os);
+    RtlGetVersion(&os);
+    FreeLibrary(hMod);
+    
+    return true;
+}
+
 	
 bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, String &distro, 
 			   String &distVersion, String &desktop, String &deskVersion)
 {
-   	OSVERSIONINFOEX osvi;
+   	RTL_OSVERSIONINFOEXW osvi;
    	SYSTEM_INFO si;
    	BOOL bOsVersionInfoEx;
 
@@ -289,22 +315,33 @@ bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, Stri
 	default:							kerArchitecture = "Unknown";
 	}
 
-   	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+   	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXW));
 
-   	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+   	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXW);
 
-   	if(!(bOsVersionInfoEx = GetVersionEx(reinterpret_cast<OSVERSIONINFO *>(&osvi))))
+   	if(!(bOsVersionInfoEx = GetVersion2(osvi)))
       	return false;
       		
 	kerVersion = Format("%d.%d", static_cast<int>(osvi.dwMajorVersion), static_cast<int>(osvi.dwMinorVersion));
 	kernel = "Windows";
 
    	if (VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMajorVersion > 4) {
-   		if (osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0) {
-   			if (osvi.wProductType == VER_NT_WORKSTATION)
-            	kernel.Cat(" 10");
-        	else 
-				kernel.Cat(" Server 2016");
+   		if (osvi.dwMajorVersion == 10) {
+			if (osvi.dwMinorVersion == 0) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
+					if (osvi.dwBuildNumber >= 21996)
+            			kernel.Cat(" 11");
+					else
+						kernel.Cat(" 10");
+        		} else {
+        			if (osvi.dwBuildNumber >= 20348)
+        		 		kernel.Cat(" Server 2022");
+        			else if (osvi.dwBuildNumber >= 17763)
+        				kernel.Cat(" Server 2019");
+        			else
+						kernel.Cat(" Server 2016");
+        		}
+			}
    		} else if (osvi.dwMajorVersion == 6) {
 			if (osvi.dwMinorVersion == 3) {
             	if (osvi.wProductType == VER_NT_WORKSTATION)
@@ -502,7 +539,7 @@ bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, Stri
          	break;
     	}
     	distro = "";
- 	}
+    }
  	desktop = kernel;
  	distVersion = deskVersion = "";
    	return true;
