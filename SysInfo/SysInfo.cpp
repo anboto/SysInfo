@@ -1111,8 +1111,8 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 	HANDLE hProcess;
 	DWORD dwProcessId;
 	HINSTANCE hInstance;
-	WCHAR str[MAX_PATH];
 	int count;
+	WCHAR str[MAX_PATH];
 	
 	EnumWindows(EnumGetWindowsList, reinterpret_cast<LPARAM>(&hWnd));	
 	for (int i = 0; i < hWnd.GetCount(); ++i) {
@@ -1126,23 +1126,26 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 		GetWindowThreadProcessId(reinterpret_cast<HWND>(hWnd[i]), &dwProcessId);
 		processId.Add(dwProcessId);
 		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwProcessId);
+		
 		if ((count = GetModuleFileNameExW(hProcess, hInstance, str, sizeof(str)/sizeof(WCHAR)))) {
-			sstr = WString(str, count).ToString();
+			sstr = WString(str).ToString();
 			fileName << sstr;
 		} else
 			fileName << t_("Unknown process");	
+
 		if ((count = GetModuleBaseNameW(hProcess, hInstance, str, sizeof(str)/sizeof(WCHAR)))) {
-			sstr = WString(str, count).ToString();
+			sstr = WString(str).ToString();
 			name << sstr;
 		 } else
 			name << t_("Unknown process");		
+		
 		CloseHandle(hProcess);
 		
 		if (sstr == "TPClnt.dll")		// VMWare Thinprint crashes SendMessageW()
 			caption << "";	
 		else if (IsWindowVisible(reinterpret_cast<HWND>(hWnd[i]))) {
-			count = int(SendMessageW(reinterpret_cast<HWND>(hWnd[i]), WM_GETTEXT, sizeof(str)/sizeof(WCHAR), reinterpret_cast<LPARAM>(str)));
-			caption << WString(str, count).ToString();	
+			SendMessageW(reinterpret_cast<HWND>(hWnd[i]), WM_GETTEXT, sizeof(str)/sizeof(WCHAR), reinterpret_cast<LPARAM>(str));
+			caption << WString(str).ToString();	
 		} else
 			caption << "";	
 	}
