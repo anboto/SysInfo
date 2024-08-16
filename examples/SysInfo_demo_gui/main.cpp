@@ -537,7 +537,7 @@ void MouseKeyboard::OnButLock() {
 }
 
 void MouseKeyboard::OnButKey() {
-	String fileTest = AppendFileNameX(GetDesktopFolder(), "test.txt");
+	String fileTest = AppendFileNameX(GetExeFolder(), "test.txt");
 	SaveFile(fileTest, "Please wait a second...");
 	LaunchFile(fileTest);
 	{
