@@ -18,8 +18,8 @@ public:
     CrashHandler(); 		
     virtual ~CrashHandler() {};
 
-	void Enable();
-	void Disable();
+	void Enable()		{enabled = true;}
+	void Disable()		{enabled = false;}
 	bool IsEnabled()	{return enabled;}
 	
 private:

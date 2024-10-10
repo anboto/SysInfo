@@ -141,14 +141,6 @@ void CrashHandler::SigtermHandler(int) {
 		return;
 	Panic("SIGTERM: Process has been asked to terminate by other application");
 }
-
-void CrashHandler::Enable() {
-	enabled = true;
-}
-
-void CrashHandler::Disable() {
-	enabled = false;
-}
 	
 CrashHandler &GetCrashHandler() {
 	static CrashHandler clss;
