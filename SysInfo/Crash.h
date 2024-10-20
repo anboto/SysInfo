@@ -49,9 +49,9 @@ private:
     static void SigillHandler(int);
     static void SigsegvHandler(int);
     static void SigtermHandler(int);
+    static void SigbusHandler(int);
     
     bool enabled;
-    unsigned int fp;
 };
 
 CrashHandler &GetCrashHandler();
