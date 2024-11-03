@@ -243,14 +243,16 @@ public:
 				active = false;
 		}
 #endif
-		nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(53*1000, 67*1000)(rng);
+		nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
 	}
 	void DoActivity() {
 		if (!active)
 			return;
 		
 		Time tm = GetSysTime();
-		if (!IsNull(fromH) && (tm.hour > fromH && tm.minute > fromM) && (tm.hour < toH && tm.minute < toM))
+		if (!IsNull(fromH) && 
+			(tm.hour < fromH || (tm.hour == fromH && tm.minute < fromM)) && 
+			(tm.hour > toH   || (tm.hour == toH   && tm.minute > toM)))
 			return;
 		
 		int x, y;
@@ -259,13 +261,13 @@ public:
 			timer.Reset();
 			x0 = x;
 			y0 = y;
-			nextDeltaTime = deltaTimeFast + std::uniform_int_distribution<int>(5*1000, 10*1000)(rng);
+			nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
 		} else {
-			if (timer.Elapsed() > nextDeltaTime) {
-				Keyb_SendKeys("{INSERT}{INSERT}", 10);
+			if (timer.Elapsed() > nextDeltaTime*1000) {
+				Keyb_SendKeys("{CTRL}", 10);
 				timer.Reset();
 				std::uniform_int_distribution<int> rand1min(53*1000, 67*1000);	
-				nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(53*1000, 67*1000)(rng);
+				nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
 			}
 		}
 	}	
@@ -275,10 +277,9 @@ private:
 	TimeStop timer;
 	int x0 = -1, y0 = -1;
 	dword deltaTime, nextDeltaTime;
-	dword deltaTimeFast = 20*1000;
 	int fromH, fromM, toH, toM;
-	std::mt19937 rng;
 	bool active = true;
+	std::mt19937 rng;
 };
 #endif
 
