@@ -201,7 +201,7 @@ void Test()
 #if defined(PLATFORM_WIN32)			
     		Window_SetRect(windowId, 10, 10, 800, 400);
 #endif    	
-    		Window_SaveCapture(windowId, GetExeDirFile("Windowgrab"));
+    		Window_SaveCapture(windowId, GetExeDirFile("Windowgrab.png"));
 		}
 	}
 
