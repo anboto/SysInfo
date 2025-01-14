@@ -1,0 +1,12 @@
+description "GUI demo of crashandler\377";
+
+uses
+	SysInfo,
+	CtrlLib;
+
+file
+	main.cpp;
+
+mainconfig
+	"" = "GUI";
+

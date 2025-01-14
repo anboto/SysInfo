@@ -222,5 +222,4 @@ CrashHandler &GetCrashHandler() {
 	return clss;
 }
 	
-	
 }

@@ -4,7 +4,7 @@
 #define _CrashHandler_Crash_h_
 
 #include <Core/Core.h>
-
+#include <SysInfo/SysInfo.h>
 
 namespace Upp {
 
@@ -55,6 +55,33 @@ private:
 };
 
 CrashHandler &GetCrashHandler();
+
+
+class Launcher {
+public:
+    bool Launch() {
+        if (p.IsRunning())
+            return false;
+			
+		if(!p.Start(Format("\"%s\" -run", GetExeFilePath()))) 
+			return false;
+		
+		return true;
+    }    
+	bool Monitor() {
+		if (!p.IsRunning()) {
+			if (p.GetExitCode() != 0) {
+				if(!p.Start(Format("\"%s\" -error", GetExeFilePath()))) 
+					return false;
+			} else
+				return false;
+		}
+		return true;
+	}
+private:
+	LocalProcess p;
+};
+
 
 }
 
