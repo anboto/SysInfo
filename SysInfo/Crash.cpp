@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2021 - 2022, the Anboto author and contributors
+#ifdef flagGUI
+#include <CtrlLib/CtrlLib.h>
+#include <Functions4U/Functions4U_Gui.h>
+#else
 #include <Core/Core.h>
+#endif
 #include "Crash.h"
 #include <signal.h>
 #include <exception>
@@ -24,12 +29,8 @@ namespace Upp {
 #pragma float_control(except, on)
 #endif
 
-void CrashPanic(const char *msg) {
+static void CrashPanic(const char *msg) {
 	throw Exc(msg);
-}
-
-void CrashMessageBox(const char *title, const char *text) {
-	throw Exc(text);
 }
 
 #ifndef flagDEBUG
@@ -62,10 +63,6 @@ CrashHandler::CrashHandler() {
 	signal(SIGFPE,  SigfpeHandler);     
 	signal(SIGILL,  SigillHandler);     
 	signal(SIGSEGV, SigsegvHandler); 
-
-#ifndef flagDEBUG
-	InstallPanicMessageBox(CrashMessageBox);
-#endif
 	
 	enabled = true;
 }
@@ -221,5 +218,157 @@ CrashHandler &GetCrashHandler() {
 	static CrashHandler clss;
 	return clss;
 }
+
+#ifdef flagGUI
+
+bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK) {
+	appname = title;
+	String sfolder(folder);
+	if (!DirectoryExists(sfolder)) {
+		sfolder = AppendFileNameX(GetAppDataFolder(), folder);
+		RealizeDirectory(sfolder);
+	}
+
+	String name;
+	if (GetEnv(Format("AnbotoWD%ld", GetParentProcessId())) != "1") {
+		isChild = false;
+		name = Format("AnbotoWD%ld", GetProcessId());
+	} else {
+		isChild = true;
+		name = Format("AnbotoWD%ld", GetParentProcessId());
+	}
 	
+	fileLog = AppendFileNameX(sfolder, name + ".log");
+		
+	if (!isChild) {
+		SetEnv(name, "1");
+		
+		DeleteFile(fileLog);
+		
+		String args;
+		for (const String &s : CommandLine())
+			args << " " << s;
+		
+		bool restart = true;
+		
+		while (restart) {
+			String kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion;
+			if (GetOsInfo(kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion)) 
+				Log(Format("Kernel: %s, Version: %s, Architecture: %s, Distro: %s, Version: %s, Desktop: %s, Version: %s", kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion));
+			
+			int memoryLoad;
+			uint64 totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual;
+			if (GetMemoryInfo(memoryLoad, totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual))
+				Log(Format("Memory: %.1f Gb", totalPhys/1024./1024./1024.));
+			
+			String name, mode;
+			Time time; 
+			int version, bits;
+			GetCompilerInfo(name, version, time, mode, bits);	
+			Log(Format("Compiler: %s, Version: %d, Time: %`, mode: %s, bits: %d", name, version, time, mode, bits));
+			
+			int64 childpid = LaunchCommand(Format("\"%s\" %s", GetExeFilePath(), args));
+			
+			while(ProcessExists(childpid)) 
+				Sleep(500);
+			
+			String slog = LoadFile(fileLog);
+			Vector<String> vlog = Split(slog, '\n');
+			if (!childpid)
+				vlog << t_("Impossible to launch application");
+			
+			if (vlog.size() > 0 && vlog[vlog.size()-1].StartsWith("End")) {
+				ExitOK();
+				restart = false;
+			} else
+				restart = ExitError(title, vlog);
+			
+			DeleteFile(fileLog);
+		}
+		return true;
+	} else 
+		Log(Format("Start: %`", GetSysTime()));
+
+	return false;
+}
+
+void ErrorMonitor::Log(const char *str) {
+	if (!fileLog.IsEmpty()) 
+		FileStrAppend(fileLog, str + S("\n"));
+	if (window)
+		window->AddStr(str);
+	logList << str;
+}
+
+void ErrorMonitor::OpenLogWindow() {
+	if (window)
+		return;
+	window = new ErrorMonitorLog([=](){window = nullptr;});
+	for (const String str : logList)
+		window->AddStr(str);
+	window->OpenMain();
+}
+
+ErrorMonitor::~ErrorMonitor() {
+	if (isChild)
+		Log(Format("End: %`", GetSysTime()));	
+}
+
+bool ErrorMonitor::DefaultExitError(const char *appname, const Vector<String> &vs) {
+	struct DialogError : TopWindow {
+		DialogError(const char *appname) {
+			Sizeable();
+			Title(Format(t_("Problem detected in %s"), appname));
+			SetRect(0, 0, Zx(320), Zy(200));
+			
+			Add(butCancel.SetLabel(t_("Cancel")).RightPosZ(8, 56).BottomPosZ(5, 20));
+			Add(butOK.SetLabel(t_("Restart")).RightPosZ(68, 56).BottomPosZ(5, 20));
+			Add(dv___2.SetLabel(t_("Click Restart to restart or Cancel to end.")).HSizePosZ(8, 0).TopPosZ(4, 19));
+			Add(array.HSizePosZ(4, 4).VSizePosZ(30, 30));
+			
+			array.AddColumn("Please copy and report this log to the developers:");
+			array.MultiSelect();
+			array.WhenBar = [&](Bar &menu) {ArrayCtrlWhenBar(menu, array);};
+		}
+		Button butCancel;
+		Button butOK;
+		Label dv___2;
+		ArrayCtrl array;
+	};
+	
+	DialogError dialog(appname);
+	
+	for (const String &str : vs)
+		dialog.array.Add(str);
+	
+	dialog.array.SetCursor(vs.size()-1);
+	
+	bool ok = true;
+	dialog.butOK		<< [&] {dialog.Close();};
+	dialog.butCancel	<< [&] {ok = false;	dialog.Close();}; 
+	dialog.TopMost(true, true);
+	dialog.Execute();
+	return ok;
+}
+
+ErrorMonitor &EM() {
+	static ErrorMonitor w;	
+	return w;
+}
+
+ErrorMonitorLog::ErrorMonitorLog(Event<> whenClose) {
+	Sizeable();
+	Title("Log");
+	
+	Add(array.SizePos());
+	array.AddColumn("");
+	array.MultiSelect().NoHeader();
+	array.WhenBar = [&](Bar &menu) {ArrayCtrlWhenBar(menu, array);};
+			
+	SetRect(0, 0, Zx(150), Zy(300));
+	
+	WhenClose = whenClose;
+}
+
+#endif	
 }

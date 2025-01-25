@@ -1,0 +1,20 @@
+LAYOUT(main, 252, 196)
+	ITEM(ButtonEM, butClose, SetLabel(t_("Close")).RightPosZ(8, 56).BottomPosZ(9, 15))
+	ITEM(Upp::Label, dv___1, SetLabel(t_("Click on the buttons to produce errors")).LeftPosZ(4, 200).TopPosZ(4, 19))
+	ITEM(TabCtrlEM, tab, HSizePosZ(4, 4).VSizePosZ(28, 32))
+	ITEM(Upp::Button, butLog, SetLabel(t_("View log")).LeftPosZ(8, 56).TopPosZ(172, 15))
+END_LAYOUT
+
+LAYOUT(memory, 172, 84)
+	ITEM(ButtonEM, butNullPointerAssignment, SetLabel(t_("NullPointerAssignment")).LeftPosZ(4, 164).TopPosZ(4, 15))
+	ITEM(ButtonEM, butUseAfterFree, SetLabel(t_("UseAfterFree")).LeftPosZ(4, 164).TopPosZ(24, 15))
+	ITEM(ButtonEM, butMemoryAllocation, SetLabel(t_("MemoryAllocation")).LeftPosZ(4, 164).TopPosZ(44, 15))
+	ITEM(ButtonEM, butDoubleFree, SetLabel(t_("DoubleFree")).LeftPosZ(4, 164).TopPosZ(64, 15))
+END_LAYOUT
+
+LAYOUT(other, 172, 64)
+	ITEM(ButtonEM, butIllegalInstruction, SetLabel(t_("IllegalInstruction")).LeftPosZ(4, 164).TopPosZ(4, 15))
+	ITEM(ButtonEM, butStackOverflow, SetLabel(t_("StackOverflow")).LeftPosZ(4, 164).TopPosZ(24, 15))
+	ITEM(ButtonEM, butFloatingPointOverflow, SetLabel(t_("FloatingPointOverflow")).LeftPosZ(4, 164).TopPosZ(44, 15))
+END_LAYOUT
+

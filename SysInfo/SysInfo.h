@@ -87,6 +87,10 @@ bool GetProcessList(Array<int64> &pid, Array<String> &pNames);
 Array<int64> GetProcessList();
 String GetProcessName(int64 pid);
 String GetProcessFileName(int64 processID);
+int64 GetParentProcessId();
+bool ProcessExists(int64 processID);
+
+bool UnSetEnv(const char *var);
 
 #if defined(PLATFORM_WIN32) 
 int GetProcessCPUUsage(int64 pid);

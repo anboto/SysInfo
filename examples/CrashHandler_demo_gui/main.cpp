@@ -6,28 +6,64 @@
 
 using namespace Upp;
 
+#define LAYOUTFILE <examples/CrashHandler_demo_gui/main.lay>
+#include <CtrlCore/lay.h>
 
-GUI_APP_MAIN
-{	
-	const Vector<String>& command = CommandLine();
-	
-	PromptOK(Format("Hello %d", command.size()));
-	
-	bool uselauncher = true;
-	if (command.size() > 0) {
-		if (Find(command, "-error") >= 0) {
-			Exclamation("There has been an error");	
-			uselauncher = false;
-		} else if (Find(command, "-run") >= 0)
-			uselauncher = false;
+#include "../CrashHandler_demo_cl/problems.h"
+
+
+struct Memory : public Withmemory<StaticRect> {
+	Memory() {
+		CtrlLayout(*this);
+		
+		butNullPointerAssignment << [] 	{NullPointerAssignment();};
+		butUseAfterFree << [] 		   	{UseAfterFree();};
+		butMemoryAllocation << [] 		{MemoryAllocation();};
+		butDoubleFree << [] 			{DoubleFree();};
 	}
+};
+
+struct Other : public Withother<StaticRect> {
+	Other() {
+		CtrlLayout(*this);
+		
+		butIllegalInstruction << [] 	{IllegalInstruction();};
+		butStackOverflow << [] 			{StackOverflow();};
+		butFloatingPointOverflow << [] 	{FloatingPointOverflow();};
+	}
+};
+
+struct Main : public Withmain<TopWindow> {
+	Memory memory;
+	Other other;
 	
-	if (uselauncher) {
-		Launcher launcher;
-		if (!launcher.Launch())
-			Exclamation("Impossible to launch application");
-		while (launcher.Monitor())
-			Sleep(5000);
-	} else
-		PromptOK("Normal application");
+	Main() {
+		CtrlLayout(*this, "Error Monitor demo");
+		
+		tab.Add(memory.SizePos(), "Memory");
+		tab.Add(other.SizePos(), "Other");
+		
+		butClose << [=] {Close();};
+		butLog << [=] {EM().OpenLogWindow();};
+	}
+};
+	
+
+GUI_APP_MAIN {	
+#if defined(PLATFORM_WIN32) 
+	GetCrashHandler().Enable();
+	#ifndef flagDEBUG
+	InstallPanicMessageBox([](const char *title, const char *text) {
+		EM().Log(Format("%s: %s", title, text));
+		throw Exc(text);
+	});
+	if (EM().Init("CrashHandler", "CrashHandler", EM().DefaultExitError, Null))
+		return;
+	#endif
+#endif
+	
+	Main main;
+	main.OpenMain();
+
+	Ctrl::EventLoop();
 }

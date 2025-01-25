@@ -30,6 +30,7 @@ file
 	SysInfo.t,
 	Copying,
 	Crash.cpp,
-	Crash.h;
+	Crash.h,
+	Crash.usc;
 
  spellcheck_comments "EN-GB"

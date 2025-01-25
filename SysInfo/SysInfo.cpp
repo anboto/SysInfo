@@ -1061,6 +1061,54 @@ String GetProcessFileName(int64 processID)
     return ret;
 }
 
+int64 GetProcessId() {
+	return GetCurrentProcessId();
+}
+
+int64 GetParentProcessId() {
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE)
+        return -1;
+
+	int64 processID = GetProcessId();
+
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    if (Process32First(hSnapshot, &pe32)) {
+        do {
+            if (pe32.th32ProcessID == processID) {
+                CloseHandle(hSnapshot);
+                return pe32.th32ParentProcessID;
+            }
+        } while (Process32Next(hSnapshot, &pe32));
+    }
+    CloseHandle(hSnapshot);
+    return -1;
+}
+
+bool ProcessExists(int64 processID) {
+	WCHAR szProcessName[MAX_PATH];
+	String ret;
+	
+    // Get a handle to the process.
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, DWORD(processID));
+
+    // Get the process name.
+    if (hProcess != NULL) {
+         CloseHandle(hProcess);
+         return true;
+    } else
+        return false;
+}
+        
+bool UnSetEnv(const char *name) {
+	String env(name);
+	auto wenv = ToUtf16(env);
+	wenv.Add(wchar_t(0));
+	return SetEnvironmentVariableW(wenv, NULL);
+}
+
 
 ULONGLONG SubtractFILETIME(FILETIME &to, FILETIME &from) {
 	__int64 timeFrom = (static_cast<__int64>(from.dwHighDateTime) << 32) + from.dwLowDateTime;
@@ -1307,6 +1355,14 @@ String GetProcessFileName(int64 pid)
 	} 
 	return ret;	
 }
+
+
+int64 GetProcessId() {return getpid();}
+
+int64 GetParentProcessId() {
+	return ScanInt64(Sys(Format("ps -o ppid= -p %ld", GetProcessId())));
+}
+
 
 void GetWindowsList_Rec (_XDisplay *dpy, Window w, int depth, Array<int64> &wid) 
 { 
@@ -1556,11 +1612,6 @@ int64 GetProcessIdFromName(String name)
 	return Null;
 }
 
-
-/////////////////////////////////////////////////////////////////////
-// Others
-
-int64    GetProcessId()			{return getpid();}
 
 /////////////////////////////////////////////////////////////////////
 // Drives list

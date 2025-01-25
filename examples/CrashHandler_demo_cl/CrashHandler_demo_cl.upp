@@ -5,7 +5,9 @@ uses
 	SysInfo;
 
 file
-	main.cpp;
+	main.cpp,
+	problems.cpp,
+	problems.h;
 
 mainconfig
 	"" = "NO_XTEST",
