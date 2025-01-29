@@ -85,6 +85,7 @@ private:
 class ErrorMonitor {
 public:
 	bool Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK);
+	bool IsInit()	{return !appname.IsEmpty();}
 	~ErrorMonitor();
 	
 	void Log(const char *str);
