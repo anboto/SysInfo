@@ -23,3 +23,36 @@ caES("Mode de gravaci\363 desconegut")
 esES("Modo de grabaci\303\263n desconocido")
 euES("Grabaketa mode ezezaguna")
 frFR("Mode d\351placement inconnu")
+
+
+// Crash.cpp
+
+T_("Impossible to launch application")
+caES("")
+esES("")
+euES("")
+frFR("")
+
+T_("Problem detected in %s")
+caES("")
+esES("")
+euES("")
+frFR("")
+
+T_("Cancel")
+caES("")
+esES("")
+euES("")
+frFR("")
+
+T_("Restart")
+caES("")
+esES("")
+euES("")
+frFR("")
+
+T_("Click Restart to restart or Cancel to end.")
+caES("")
+esES("")
+euES("")
+frFR("")
