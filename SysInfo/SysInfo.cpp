@@ -1066,14 +1066,14 @@ int64 GetProcessId() {
 }
 
 int64 GetParentProcessId() {
-    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (hSnapshot == INVALID_HANDLE_VALUE)
-        return -1;
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (hSnapshot == INVALID_HANDLE_VALUE)
+		return -1;
 
 	int64 processID = GetProcessId();
 
-    PROCESSENTRY32 pe32;
-    pe32.dwSize = sizeof(PROCESSENTRY32);
+	PROCESSENTRY32 pe32;
+	pe32.dwSize = sizeof(PROCESSENTRY32);
 
     if (Process32First(hSnapshot, &pe32)) {
         do {
@@ -1088,7 +1088,6 @@ int64 GetParentProcessId() {
 }
 
 bool ProcessExists(int64 processID) {
-	WCHAR szProcessName[MAX_PATH];
 	String ret;
 	
     // Get a handle to the process.
