@@ -61,7 +61,7 @@ private:
 CrashHandler &GetCrashHandler();
 
 
-#ifdef flagGUI
+#if defined(flagGUI) && defined(PLATFORM_WIN32)
 
 class ErrorMonitorLog : public TopWindow {
 public:
@@ -161,6 +161,11 @@ private:
 	}
 	int prev_h = -1;
 };	
+
+#else
+
+#define ButtonEM 	Button
+#define TabCtrlEM	TabCtrl
 
 #endif
 }

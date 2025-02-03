@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2021 - 2022, the Anboto author and contributors
-#ifdef flagGUI
+#if defined(flagGUI) && (defined(__WIN32) || defined(_WIN32) || defined(WIN32))
 #include <CtrlLib/CtrlLib.h>
 #include <Functions4U/Functions4U_Gui.h>
 #else
@@ -219,7 +219,7 @@ CrashHandler &GetCrashHandler() {
 	return clss;
 }
 
-#ifdef flagGUI
+#if defined(flagGUI) && defined(PLATFORM_WIN32)
 
 bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK) {
 	appname = title;
