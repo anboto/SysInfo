@@ -261,11 +261,11 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 			if (GetMemoryInfo(memoryLoad, totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual))
 				Log(Format("Memory: %.1f Gb", totalPhys/1024./1024./1024.));
 			
-			String name, mode;
+			String nam, mode;
 			Time time; 
 			int version, bits;
-			GetCompilerInfo(name, version, time, mode, bits);	
-			Log(Format("Compiler: %s, Version: %d, Time: %`, mode: %s, bits: %d", name, version, time, mode, bits));
+			GetCompilerInfo(nam, version, time, mode, bits);	
+			Log(Format("Compiler: %s, Version: %d, Time: %`, mode: %s, bits: %d", nam, version, time, mode, bits));
 			
 			int64 childpid = LaunchCommand(Format("\"%s\" %s", GetExeFilePath(), args));
 			
@@ -304,7 +304,7 @@ void ErrorMonitor::OpenLogWindow() {
 	if (window)
 		return;
 	window = new ErrorMonitorLog([=](){window = nullptr;});
-	for (const String str : logList)
+	for (const String &str : logList)
 		window->AddStr(str);
 	window->OpenMain();
 }
