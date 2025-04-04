@@ -117,49 +117,16 @@ private:
 
 class TabCtrlEM : public TabCtrl {
 private:
-	virtual void LeftDown(Point p, dword d) {
-		int h = GetTab(p);
-		if (h >= 0 && GetItem(h).IsEnabled() && h != prev_h) {
-			EM().Log(Format("Tab %s", GetItem(h).GetText()));
-			TabCtrl::LeftDown(p, d);
-			prev_h = h;
-		}
-	}
-	virtual bool Key(dword key, int count) {
-		int h = Get();
-		switch(key) {
-	#ifdef PLATFORM_COCOA
-		case K_ALT|K_TAB:
-		case K_OPTION|K_TAB:
-	#endif
-		case CtrlCoreKeys::K_CTRL_TAB:
-			h++;
-			break;
-	#ifdef PLATFORM_COCOA
-		case K_SHIFT|K_ALT|K_TAB:
-		case K_SHIFT|K_OPTION|K_TAB:
-	#endif
-		case K_SHIFT_CTRL_TAB:
-			h--;
-			break;
-		}		
-		if (h >= 0 && h < GetCount() && h != prev_h) {
-			Item& item = GetItem(h);
-			if (item.IsEnabled()) 
-			EM().Log(Format("Tab %s", item.GetText()));
-			prev_h = h;
-		}
-		return TabCtrl::Key(key, count);
-	}
 	virtual void Paint(Draw& draw) {
-		if (prev_h < 0) {
-			prev_h = 0;
-			if (GetCount() > 0 && GetItem(0).IsEnabled()) 
-				EM().Log(Format("Tab %s", GetItem(0).GetText()));
+		int actual_t = Get();
+		if (prev_t < 0 || prev_t != actual_t) {
+			prev_t = actual_t;
+			if (GetCount() > 0 && GetItem(prev_t).IsEnabled()) 
+				EM().Log(Format("Tab %s", GetItem(prev_t).GetText()));
 		}
 		TabCtrl::Paint(draw);
 	}
-	int prev_h = -1;
+	int prev_t = -1;
 };	
 
 #else
