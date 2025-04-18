@@ -6,6 +6,7 @@
 #include <plugin/jpg/jpg.h>
 #include <plugin/bmp/bmp.h>
 
+#include <Functions4U/EnableWarnings.h>
 
 namespace Upp {
 
@@ -112,14 +113,14 @@ Image Window_SaveCapture(int64 windowId, int left, int top, int width, int heigh
 		return Null;		
 	}
    	if(bmi.bmiHeader.biSizeImage <= 0)
-     	bmi.bmiHeader.biSizeImage = bmi.bmiHeader.biWidth*abs(bmi.bmiHeader.biHeight)*
-     									(bmi.bmiHeader.biBitCount+7)/8;
+     	bmi.bmiHeader.biSizeImage = DWORD(bmi.bmiHeader.biWidth*abs(bmi.bmiHeader.biHeight)*
+     									  (bmi.bmiHeader.biBitCount+7)/8);
 	bmi.bmiHeader.biCompression = BI_RGB;
 	bmi.bmiHeader.biHeight = -height;
 	bmi.bmiHeader.biBitCount = 32;
 
 	ImageBuffer b(width, height);
-	if (GetDIBits(hDC, hb, 0, height, ~b, &bmi, DIB_RGB_COLORS))
+	if (GetDIBits(hDC, hb, 0, (unsigned)height, ~b, &bmi, DIB_RGB_COLORS))
 		img = b;
 	
 	SelectObject(hDC, oldBM);
@@ -176,7 +177,7 @@ public:
 	void Close();
 };
 
-bool Record_Desktop(String fileName, int duration, double secsFrame, bool viewMouse)
+bool Record_Desktop(String fileName, unsigned duration, double secsFrame, bool viewMouse)
 {
 	ScreenGrab grab(fileName, secsFrame, viewMouse);
 	if (!grab.IniGrabDesktop())
@@ -186,7 +187,7 @@ bool Record_Desktop(String fileName, int duration, double secsFrame, bool viewMo
 	grab.Close();
 	return true;
 }
-bool Record_DesktopRectangle(String fileName, int duration, int left, int top, int width, int height, double secsFrame, bool viewMouse)
+bool Record_DesktopRectangle(String fileName, unsigned duration, int left, int top, int width, int height, double secsFrame, bool viewMouse)
 {
 	ScreenGrab grab(fileName, secsFrame, viewMouse);
 	if (!grab.IniGrabDesktopRectangle(left, top, width, height))
@@ -197,8 +198,7 @@ bool Record_DesktopRectangle(String fileName, int duration, int left, int top, i
 	return true;
 }
 
-bool Record_Window(String fileName, int duration, int64 handle, double secsFrame, bool viewMouse)
-{
+bool Record_Window(String fileName, unsigned duration, uint64 handle, double secsFrame, bool viewMouse) {
 	ScreenGrab grab(fileName, secsFrame, viewMouse);
 	if (!grab.IniGrabWindow(handle))
 		return false;
@@ -210,7 +210,8 @@ bool Record_Window(String fileName, int duration, int64 handle, double secsFrame
 
 bool ScreenGrab::AVIOpen(bool create)
 {
-    long lRet, mode, res;
+    long lRet, res;
+    unsigned mode;
     
     AVIFileInit();
     if (create)
@@ -257,7 +258,7 @@ bool ScreenGrab::AVIWrite()
 {
     HRESULT  lRet;
     
-    lRet = AVIStreamWrite(lAVIPtrStrm, lAVICnt, 1, lDibPtr, tBmpInfo.bmiHeader.biSizeImage, AVIIF_KEYFRAME, NULL, NULL);
+    lRet = AVIStreamWrite(lAVIPtrStrm, lAVICnt, 1, lDibPtr, (long)tBmpInfo.bmiHeader.biSizeImage, AVIIF_KEYFRAME, NULL, NULL);
     if (lRet == AVIERR_OK) {
         lAVICnt++;
         return true;
@@ -274,17 +275,13 @@ void ScreenGrab::AVIClose()
     AVIFileExit();
 }
 
-HICON ScreenGrab::GetCursorHandle()
-{
-    HWND lHandle;
+HICON ScreenGrab::GetCursorHandle() {
     POINT lpPos;
-    long lThreadID;
-    long lCurrentThreadID;
  
   	GetCursorPos(&lpPos);
-    lHandle = WindowFromPoint(lpPos);
-    lThreadID = GetWindowThreadProcessId(lHandle, 0);
-    lCurrentThreadID = GetWindowThreadProcessId(reinterpret_cast<HWND>(GetWindowIdFromProcessId(GetProcessId())), 0); 
+    HWND lHandle = WindowFromPoint(lpPos);
+    DWORD lThreadID = GetWindowThreadProcessId(lHandle, 0);
+    DWORD lCurrentThreadID = GetWindowThreadProcessId(reinterpret_cast<HWND>(GetWindowIdFromProcessId(GetProcessId())), 0); 
     HICON ret;
     if (lThreadID != lCurrentThreadID) {
         if (AttachThreadInput(lCurrentThreadID, lThreadID, true)) {
@@ -316,7 +313,7 @@ bool ScreenGrab::DIBCreate(HWND lHandleSource, long lWidth, long lHeight, long l
 			tBmpInfo.bmiHeader.biPlanes = 1;
 			tBmpInfo.bmiHeader.biBitCount = 24;
 			tBmpInfo.bmiHeader.biCompression = 0;
-			tBmpInfo.bmiHeader.biSizeImage = ((tBmpInfo.bmiHeader.biWidth * 3 + 3) & 0xFFFFFFFC) * tBmpInfo.bmiHeader.biHeight;
+			tBmpInfo.bmiHeader.biSizeImage = ((unsigned long)(tBmpInfo.bmiHeader.biWidth * 3 + 3) & 0xFFFFFFFC) * (unsigned long)tBmpInfo.bmiHeader.biHeight;
             lDib = CreateDIBSection(lDCDest, &tBmpInfo, 0, &lDibPtr, 0, 0);
             if (lDib != 0) {
                 lBmpOld = SelectObject(lDCDest, lDib);

@@ -23,6 +23,8 @@
 #endif
 #endif
 
+#include <Functions4U/EnableWarnings.h>
+
 namespace Upp {
 
 #define TFILE <SysInfo/SysInfo.t>
@@ -42,6 +44,7 @@ REFCLSID ___CLSID_WbemAdministrativeLocator =
 #else
 #define ___CLSID_WbemAdministrativeLocator CLSID_WbemAdministrativeLocator
 #endif
+
 
 bool GetWMIInfo(String system, Vector <String> &data, Array <Value> *ret[], String nameSpace = "root\\cimv2") {
 	HRESULT hRes;
@@ -339,9 +342,9 @@ Array <NetAdapter> GetAdapterInfo() {
 	
 	for (PIP_ADAPTER_ADDRESSES pAdd = pAddresses; pAdd; pAdd = pAdd->Next) {
 		NetAdapter &adapter = ret.Add();
-		int len = min(static_cast<DWORD>(6), pAdd->PhysicalAddressLength);
+		DWORD len = min(static_cast<DWORD>(6), pAdd->PhysicalAddressLength);
 		if (len > 0)
-			adapter.mac = ToUpper(HexString(pAdd->PhysicalAddress, len, 1, ':'));
+			adapter.mac = ToUpper(HexString(pAdd->PhysicalAddress, (int)len, 1, ':'));
 		adapter.description = Trim(WideToString(pAdd->Description));
 		adapter.fullname = Trim(WideToString(pAdd->FriendlyName));
    		adapter.dnsSuffix = Trim(WideToString(pAdd->DnsSuffix));
@@ -902,7 +905,7 @@ bool GetMemoryInfo(
 	status.dwLength = sizeof (status);
 	if (!GlobalMemoryStatusEx(&status))
 		return false;
-	memoryLoad          = status.dwMemoryLoad;
+	memoryLoad          = (int)status.dwMemoryLoad;
 	totalPhys			= status.ullTotalPhys;
 	freePhys			= status.ullAvailPhys;
 	totalPageFile		= status.ullTotalPageFile;
@@ -1113,7 +1116,7 @@ ULONGLONG SubtractFILETIME(FILETIME &to, FILETIME &from) {
 	__int64 timeFrom = (static_cast<__int64>(from.dwHighDateTime) << 32) + from.dwLowDateTime;
 	__int64 timeTo   = (static_cast<__int64>(to.dwHighDateTime) << 32) + to.dwLowDateTime;
 	__int64 delta = timeTo - timeFrom;
-	return delta;
+	return (ULONGLONG)delta;
 }
 
 int GetProcessCPUUsage(int64 pid) {
@@ -1129,12 +1132,12 @@ int GetProcessCPUUsage(int64 pid) {
 	GetSystemTimes(&iddleTime, &kernelTimeS, &userTimeS);
 	GetProcessTimes(hp, &creationTime, &exitTime, &kernelTimeP, &userTimeP);
 	
-	int64 kernelS = SubtractFILETIME(kernelTimeS, kernelTimeS_0);
-	int64 userS = SubtractFILETIME(userTimeS, userTimeS_0);
-	int64 totalS = kernelS + userS;
-	int64 kernelP = SubtractFILETIME(kernelTimeP, kernelTimeP_0);
-	int64 userP = SubtractFILETIME(userTimeP, userTimeP_0);
-	int64 totalP = kernelP + userP;
+	ULONGLONG kernelS = SubtractFILETIME(kernelTimeS, kernelTimeS_0);
+	ULONGLONG userS = SubtractFILETIME(userTimeS, userTimeS_0);
+	ULONGLONG totalS = kernelS + userS;
+	ULONGLONG kernelP = SubtractFILETIME(kernelTimeP, kernelTimeP_0);
+	ULONGLONG userP = SubtractFILETIME(userTimeP, userTimeP_0);
+	ULONGLONG totalP = kernelP + userP;
 
 	int cpu = int((100*totalP)/totalS);
 	CloseHandle(hp);
@@ -1158,7 +1161,7 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 	HANDLE hProcess;
 	DWORD dwProcessId;
 	HINSTANCE hInstance;
-	int count;
+	DWORD count;
 	WCHAR str[MAX_PATH];
 	
 	EnumWindows(EnumGetWindowsList, reinterpret_cast<LPARAM>(&hWnd));	
@@ -1214,15 +1217,14 @@ BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam)
   	return TRUE;
 }
 
-bool ProcessTerminate(int64 pId, int timeout)
-{
+bool ProcessTerminate(int64 pId, int timeout) {
   	HANDLE hProc = ::OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, DWORD(pId));
   	if(hProc == NULL)
     	return false;
   	::EnumWindows(reinterpret_cast<WNDENUMPROC>(TerminateAppEnum), static_cast<LPARAM>(pId));
 
 	int ret;
-  	DWORD state = ::WaitForSingleObject(hProc, timeout);
+  	DWORD state = ::WaitForSingleObject(hProc, (DWORD)timeout);
   	if ((state == WAIT_TIMEOUT) || (state == WAIT_FAILED))
      	ret = ::TerminateProcess(hProc, 0);
 	else
@@ -1231,13 +1233,11 @@ bool ProcessTerminate(int64 pId, int timeout)
 	return ret;
 }
 
-int GetProcessPriority(int64 pid)
-{
-	int priority;
+int GetProcessPriority(int64 pid) {
 	HANDLE hProc = ::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, DWORD(pid));
   	if(hProc == NULL) 
     	return -1;
-	priority = ::GetPriorityClass(hProc);
+	DWORD priority = ::GetPriorityClass(hProc);
    	CloseHandle(hProc);
    	
    	switch(priority) {
@@ -1255,7 +1255,7 @@ int GetProcessPriority(int64 pid)
 									break;
 	default:						return -1;
    	}
-  	return priority;	
+  	return (int)priority;	
 }
  
 bool SetProcessPriority(int64 pid, int priority)
@@ -1275,7 +1275,7 @@ bool SetProcessPriority(int64 pid, int priority)
    		priority = BELOW_NORMAL_PRIORITY_CLASS;
   	else
   		priority = IDLE_PRIORITY_CLASS;
-	int ret = ::SetPriorityClass(hProc, priority);		// SetProcessAffinityMask
+	int ret = ::SetPriorityClass(hProc, (DWORD)priority);		// SetProcessAffinityMask
    	CloseHandle(hProc) ;
   	return ret;	
 }
@@ -1898,8 +1898,8 @@ bool PutWindowPlacement(HWND hwnd, RECT rcNormalPosition, POINT ptMinPosition, P
     place.ptMinPosition = ptMinPosition;
     place.ptMaxPosition = ptMaxPosition;
     place.rcNormalPosition = rcNormalPosition;
-    place.showCmd = showcmd;
-    place.flags = flags;
+    place.showCmd = (unsigned)showcmd;
+    place.flags = (unsigned)flags;
     place.length = sizeof(place);
     return ::SetWindowPlacement(hwnd, &place);
 }
@@ -1916,7 +1916,7 @@ bool TakeWindowPlacement(HWND hwnd, RECT &rcNormalPosition, POINT &ptMinPosition
     
     ptMaxPosition = place.ptMaxPosition;
     rcNormalPosition = place.rcNormalPosition;
-    showcmd = place.showCmd;     //SW_SHOWMAXIMIZED, SW_SHOWMINIMIZED, SW_SHOWNORMAL
+    showcmd = (long)place.showCmd;     //SW_SHOWMAXIMIZED, SW_SHOWMINIMIZED, SW_SHOWNORMAL
     
     return ret;
 }

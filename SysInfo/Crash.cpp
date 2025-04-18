@@ -22,8 +22,9 @@
 #include <memory>
 #endif
 
-namespace Upp {
+#include <Functions4U/EnableWarnings.h>
 
+namespace Upp {
 
 #if defined(PLATFORM_WIN32)
 #pragma float_control(except, on)
@@ -41,7 +42,7 @@ CrashHandler::CrashHandler() {
 #if defined(PLATFORM_WIN32)
 	#ifdef flagDEBUG	// It doesn't work properly in release
 	_clearfp();
-	_controlfp(_controlfp(0, 0) & ~(_EM_INVALID | _EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
+	_controlfp(_controlfp(0, 0) & unsigned(~(_EM_INVALID | _EM_ZERODIVIDE | _EM_OVERFLOW)), _MCW_EM);
 	#endif
 	
 	SetUnhandledExceptionFilter(UnhandledHandler);    

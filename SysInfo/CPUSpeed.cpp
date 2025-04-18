@@ -2,6 +2,8 @@
 // Copyright 2021 - 2022, the Anboto author and contributors
 #include "SysInfo.h"
 
+#include <Functions4U/EnableWarnings.h>
+
 namespace Upp {
 	
 #if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)

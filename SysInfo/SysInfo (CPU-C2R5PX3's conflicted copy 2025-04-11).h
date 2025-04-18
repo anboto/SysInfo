@@ -175,7 +175,7 @@ bool SetKeyLockStatus(bool caps, bool num, bool scroll);
 
 bool Record_Desktop(String fileName, unsigned duration, double secsFrame = 1, bool viewMouse = true);
 bool Record_DesktopRectangle(String fileName, unsigned duration, int left, int top, int width, int height, double secsFrame = 1, bool viewMouse = true);
-bool Record_Window(String fileName, unsigned duration, uint64 handle, double secsFrame = 1, bool viewMouse = true);
+bool Record_Window(String fileName, unsigned duration, int64 handle, double secsFrame = 1, bool viewMouse = true);
 
 #endif
 

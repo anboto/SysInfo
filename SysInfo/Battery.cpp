@@ -2,6 +2,7 @@
 // Copyright 2021 - 2022, the Anboto author and contributors
 #include "SysInfo_in.h"
 
+#include <Functions4U/EnableWarnings.h>
 
 namespace Upp {
 
@@ -137,7 +138,7 @@ bool GetBatteryInfo(bool &present/*, int &designCapacity, int &lastFullCapacity,
 
 bool DriveOpenClose(String drive, bool open)
 {
-	int operation;
+	DWORD operation;
 	if (open)
 		operation = IOCTL_STORAGE_EJECT_MEDIA;
 	else

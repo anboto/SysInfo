@@ -484,11 +484,11 @@ void ScreenGrabTab::ButGrab_Push() {
 	
 	bool ret;
 	if (~SwGrabMode == 0) 
-		ret = Record_Desktop(~EditFileNameGrab, EditTime, EditFrameRate, OpGrabMouse);
+		ret = Record_Desktop(~EditFileNameGrab, (unsigned)EditTime, EditFrameRate, OpGrabMouse);
 	else if (~SwGrabMode == 1) 
-		ret = Record_Window(~EditFileNameGrab, EditTime, GetWindowIdFromCaption(~EditWindowTitle, false), EditFrameRate, OpGrabMouse);
+		ret = Record_Window(~EditFileNameGrab, (unsigned)EditTime, GetWindowIdFromCaption(~EditWindowTitle, false), EditFrameRate, OpGrabMouse);
 	else if (~SwGrabMode == 2) 
-		ret = Record_DesktopRectangle(~EditFileNameGrab, EditTime, EditLeft, EditTop, EditWidth, EditHeight, EditFrameRate, OpGrabMouse);
+		ret = Record_DesktopRectangle(~EditFileNameGrab, (unsigned)EditTime, EditLeft, EditTop, EditWidth, EditHeight, EditFrameRate, OpGrabMouse);
 	else
 		throw Exc("Unexpected value");
 	if (!ret)

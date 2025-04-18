@@ -2,12 +2,13 @@
 // Copyright 2021 - 2022, the Anboto author and contributors
 #include "SysInfo_in.h"
 
+#include <Functions4U/EnableWarnings.h>
 
 namespace Upp {
 
 struct KeyCodes {
 	String key; 
-	int code;
+	unsigned code;
 }; 
 
 #if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
@@ -57,45 +58,43 @@ bool Mouse_GetPos(int &x, int &y) {
 }
 
 KeyCodes keyCodes[60] = {
-	"NUMPAD7", 	VK_NUMPAD7, 	"BACK", 	VK_BACK, 
-	"NUMPAD8", 	VK_NUMPAD8,		"TAB", 		VK_TAB,
-	"NUMPAD9", 	VK_NUMPAD9, 	"RETURN", 	VK_RETURN,
-	"MULTIPLY", VK_MULTIPLY, 	"SHIFT",	VK_SHIFT,
-	"ADD",		VK_ADD, 	 	"CONTROL",	VK_CONTROL,
-	"SEPARATOR", VK_SEPARATOR,	"MENU", 	VK_MENU,
-	"SUBTRACT", VK_SUBTRACT, 	"PAUSE", 	VK_PAUSE,
-	"DECIMAL",	VK_DECIMAL,		"CAPITAL", 	VK_CAPITAL,
-	"DIVIDE",	VK_DIVIDE, 		"ESCAPE",	VK_ESCAPE,
-	"F1", 		VK_F1, 			"SPACE", 	VK_SPACE,
-	"F2", 		VK_F2,	 		"END",		VK_END,
-	"F3",		VK_F3, 			"HOME",		VK_HOME,
-	"F4",		VK_F4, 			"LEFT", 	VK_LEFT,
-	"F5",		VK_F5,		 	"UP", 		VK_UP,
-	"F6",		VK_F6,		 	"RIGHT",	VK_RIGHT,
-	"F7",		VK_F7,		 	"DOWN",		VK_DOWN,
-	"F8",		VK_F8,		 	"PRINT",	VK_PRINT,
-	"F9",		VK_F9,		 	"SNAPSHOT",	VK_SNAPSHOT,
-	"F10",		VK_F10,		 	"INSERT",	VK_INSERT,
-	"F11",		VK_F11,		 	"DELETE",	VK_DELETE,
-	"F12",		VK_F12,		 	"LWIN",		VK_LWIN,
-	"NUMLOCK",	VK_NUMLOCK,	 	"RWIN",		VK_RWIN,
-	"SCROLL",	VK_SCROLL,	 	"NUMPAD0",	VK_NUMPAD0,
-	"LSHIFT",	VK_LSHIFT,	 	"NUMPAD1", 	VK_NUMPAD1,
-	"RSHIFT",	VK_RSHIFT,	 	"NUMPAD2",	VK_NUMPAD2,
-	"LCONTROL",	VK_LCONTROL, 	"NUMPAD3",	VK_NUMPAD3,
-	"RCONTROL",	VK_RCONTROL, 	"NUMPAD4",	VK_NUMPAD4,
-	"LMENU",	VK_LMENU, 		"NUMPAD5",	VK_NUMPAD5,
-	"RMENU",	VK_RMENU, 		"NUMPAD6",	VK_NUMPAD6,
+	{"NUMPAD7", 	VK_NUMPAD7},{"BACK", 	VK_BACK}, 
+	{"NUMPAD8", 	VK_NUMPAD8},{"TAB", 		VK_TAB},
+	{"NUMPAD9", 	VK_NUMPAD9},{"RETURN", 	VK_RETURN},
+	{"MULTIPLY", VK_MULTIPLY}, 	{"SHIFT",	VK_SHIFT},
+	{"ADD",		VK_ADD}, 	 	{"CONTROL",	VK_CONTROL},
+	{"SEPARATOR", VK_SEPARATOR},{"MENU", 	VK_MENU},
+	{"SUBTRACT", VK_SUBTRACT}, 	{"PAUSE", 	VK_PAUSE},
+	{"DECIMAL",	VK_DECIMAL},	{"CAPITAL", 	VK_CAPITAL},
+	{"DIVIDE",	VK_DIVIDE}, 	{"ESCAPE",	VK_ESCAPE},
+	{"F1", 		VK_F1}, 		{"SPACE", 	VK_SPACE},
+	{"F2", 		VK_F2},	 		{"END",		VK_END},
+	{"F3",		VK_F3}, 		{"HOME",		VK_HOME},
+	{"F4",		VK_F4}, 		{"LEFT", 	VK_LEFT},
+	{"F5",		VK_F5},		 	{"UP", 		VK_UP},
+	{"F6",		VK_F6},		 	{"RIGHT",	VK_RIGHT},
+	{"F7",		VK_F7},		 	{"DOWN",		VK_DOWN},
+	{"F8",		VK_F8},		 	{"PRINT",	VK_PRINT},
+	{"F9",		VK_F9},		 	{"SNAPSHOT",	VK_SNAPSHOT},
+	{"F10",		VK_F10},		{"INSERT",	VK_INSERT},
+	{"F11",		VK_F11},		{"DELETE",	VK_DELETE},
+	{"F12",		VK_F12},		{"LWIN",		VK_LWIN},
+	{"NUMLOCK",	VK_NUMLOCK},	{"RWIN",		VK_RWIN},
+	{"SCROLL",	VK_SCROLL},	 	{"NUMPAD0",	VK_NUMPAD0},
+	{"LSHIFT",	VK_LSHIFT},	 	{"NUMPAD1", 	VK_NUMPAD1},
+	{"RSHIFT",	VK_RSHIFT},	 	{"NUMPAD2",	VK_NUMPAD2},
+	{"LCONTROL",	VK_LCONTROL},{"NUMPAD3",	VK_NUMPAD3},
+	{"RCONTROL",	VK_RCONTROL},{"NUMPAD4",	VK_NUMPAD4},
+	{"LMENU",	VK_LMENU}, 		{"NUMPAD5",	VK_NUMPAD5},
+	{"RMENU",	VK_RMENU}, 		{"NUMPAD6",	VK_NUMPAD6},
 	/*"PGUP", 	XK_Page_Up, 	"PGDOWN", 	XK_Page_Down
 	"CAPSLOCK", XK_Caps_Lock, 	"BACKSPACE",XK_BackSpace	*/
-	"", 0
+	{"", 0}
 };
 
-void PressKeyVK(int keyVK, bool hold = false, bool release = false, bool compatible = false) {    
-    long nScan, nExtended;
-        
-    nScan = MapVirtualKey(keyVK, 2);
-    nExtended = 0;
+void PressKeyVK(unsigned keyVK, bool hold = false, bool release = false, bool compatible = false) {    
+    unsigned nScan = MapVirtualKey(keyVK, 2);
+    unsigned nExtended = 0;
     if (nScan == 0)
         nExtended = KEYEVENTF_EXTENDEDKEY;
     nScan = MapVirtualKey(keyVK, 0);
@@ -126,20 +125,20 @@ void PressKeyVK(int keyVK, bool hold = false, bool release = false, bool compati
 void PressKey(wchar key, bool hold = false, bool release = false) {
 	if ((key >= 'a' && key <= 'z') || (key >= 'A' && key <= 'Z') || (key >= '0' && key <= '9')) {
 		HKL hKeyboardLayout = ::GetKeyboardLayout(0);
-    	SHORT nVK = VkKeyScanExW(static_cast<WCHAR>(key), hKeyboardLayout);
+    	unsigned nVK = (unsigned)VkKeyScanExW(static_cast<WCHAR>(key), hKeyboardLayout);
     	UINT nScan = MapVirtualKeyExW(nVK, MAPVK_VK_TO_CHAR, hKeyboardLayout);
 		if (!release) 
         	keybd_event(static_cast<BYTE>(nVK), static_cast<BYTE>(nScan), 0, 0);
     	if (!hold) 
         	keybd_event(static_cast<BYTE>(nVK), static_cast<BYTE>(nScan), KEYEVENTF_KEYUP, 0);
 	} else {
-		String numStr = FormatIntDec(key, 5, '0');
+		String numStr = FormatIntDec((int)key, 5, '0');
 		PressKeyVK(VK_LMENU, true);
-		PressKeyVK(VK_NUMPAD0 + numStr[0] - '0');
-		PressKeyVK(VK_NUMPAD0 + numStr[1] - '0');
-		PressKeyVK(VK_NUMPAD0 + numStr[2] - '0');
-		PressKeyVK(VK_NUMPAD0 + numStr[3] - '0');
-		PressKeyVK(VK_NUMPAD0 + numStr[4] - '0');
+		PressKeyVK(VK_NUMPAD0 + unsigned(numStr[0] - '0'));
+		PressKeyVK(VK_NUMPAD0 + unsigned(numStr[1] - '0'));
+		PressKeyVK(VK_NUMPAD0 + unsigned(numStr[2] - '0'));
+		PressKeyVK(VK_NUMPAD0 + unsigned(numStr[3] - '0'));
+		PressKeyVK(VK_NUMPAD0 + unsigned(numStr[4] - '0'));
 		PressKeyVK(VK_LMENU, false, true);
 	}
 }
@@ -421,7 +420,7 @@ void Mouse_RightDblClick()
 int GetKeyCode(String key) {
 	for (int i = 0; keyCodes[i].code != 0; ++i)
 		if (keyCodes[i].key == key)
-			return keyCodes[i].code;
+			return (int)keyCodes[i].code;
 	return 0;
 }
 
@@ -433,23 +432,23 @@ void Keyb_SendKeys(String text, long finalDelay, long delayBetweenKeys)
 	WString wtext(text);
 	for (int i = 0; i < wtext.GetCount(); ++i) {
 		bool vk = false;
-		Sleep(delayBetweenKeys);
-		wchar c = wtext[i];
+		Sleep((unsigned)delayBetweenKeys);
+		wchar c = (wchar)wtext[i];
 		if (c == '{')
 			inKey = true;
 		else if (c == '}') {
 			if (key == "{") 
 				c = '{';
 			else {
-				c = GetKeyCode(key);
+				c = (wchar)GetKeyCode(key);
 				vk = true;
 			}
 			inKey = false;
 			key = "";
 		} else if (inKey == 1)
-			key.Cat(c);
+			key.Cat((int)c);
 		else if (c == '\n') {
-			c = GetKeyCode("RETURN");
+			c = (wchar)GetKeyCode("RETURN");
 			vk = true;
 		}
  		if (inKey == false) {
@@ -467,7 +466,7 @@ void Keyb_SendKeys(String text, long finalDelay, long delayBetweenKeys)
 	for (int i = 0; i < virt.GetCount(); ++i)
 		PressKeyVK(virt[i], false, true);
 #endif
-	Sleep(finalDelay);
+	Sleep((unsigned)finalDelay);
 }
 
 #endif
