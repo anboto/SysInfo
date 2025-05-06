@@ -1,7 +1,5 @@
 description "OS, hardware and Desktop handling functions\377B44,169,203";
 
-noblitz;
-
 uses
 	Core,
 	Functions4U;
