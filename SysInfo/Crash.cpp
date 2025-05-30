@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2021 - 2022, the Anboto author and contributors
-#if defined(flagGUI) && (defined(__WIN32) || defined(_WIN32) || defined(WIN32))
-#include <CtrlLib/CtrlLib.h>
-#include <Functions4U/Functions4U_Gui.h>
-#else
-#include <Core/Core.h>
-#endif
 #include "Crash.h"
 #include <signal.h>
 #include <exception>

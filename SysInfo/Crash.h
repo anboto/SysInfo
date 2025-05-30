@@ -3,8 +3,9 @@
 #ifndef _CrashHandler_Crash_h_
 #define _CrashHandler_Crash_h_
 
-#ifdef flagGUI
+#if defined(flagGUI) //&& (defined(__WIN32) || defined(_WIN32) || defined(WIN32))
 #include <CtrlLib/CtrlLib.h>
+#include <Functions4U/Functions4U_Gui.h>
 #else
 #include <Core/Core.h>
 #endif
@@ -20,7 +21,7 @@ namespace Upp {
 
 class CrashHandler {
 public:
-    CrashHandler(); 		
+    CrashHandler();
     virtual ~CrashHandler() {};
 
 	void Enable()		{enabled = true;}

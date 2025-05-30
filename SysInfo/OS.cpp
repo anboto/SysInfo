@@ -637,11 +637,11 @@ bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, Stri
 				desktop = desktopStr.GetText();
 				StringParse xfceVersion = Sys(Format("%s-about --version", desktop));
 				while (true) {
-					String str = xfceVersion.GetText();
-					if (atof(str) > 0) {
-						deskVersion = str;
+					String strver = xfceVersion.GetText();
+					if (atof(strver) > 0) {
+						deskVersion = strver;
 						break;
-					} else if (str.IsEmpty())
+					} else if (strver.IsEmpty())
 						break;
 				}			
 			} else if (desktopStr.Find("enlightenment") >= 0) {
