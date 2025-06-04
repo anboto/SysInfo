@@ -490,7 +490,7 @@ Window GetToplevelParent(_XDisplay *display, Window window) {
 	
 	while (true) {
 		if (0 == XQueryTree(display, window, &root, &parent, &children, &numChildren)) 
-		 	return -1;
+		 	return 0;
 		if (children)  
 		 	XFree(children);
 
@@ -510,10 +510,10 @@ Rect GetDesktopRect() {
 		return Null;
 	}
 	int screen = DefaultScreen(dpy);
-	int64 windowId = RootWindow(dpy, screen);
+	int64 windowId = (int64)RootWindow(dpy, screen);
 	
 	XWindowAttributes rc;
-  	if (!XGetWindowAttributes(dpy, windowId, &rc)) {
+  	if (!XGetWindowAttributes(dpy, (unsigned long)windowId, &rc)) {
 	  	XCloseDisplay(dpy);
 		SetX11ErrorHandler();
 		return Null;	
@@ -526,8 +526,7 @@ Rect GetDesktopRect() {
 	return ret;
 }
 
-Image Window_SaveCapture(int64 windowId, int left, int top, int width, int height)
-{
+Image Window_SaveCapture(int64 windowId, int left, int top, int width, int height) {
 	if ((width <= 0 && width != -1) || (height <= 0 && height != -1))
 		return Null;
 		
@@ -540,17 +539,17 @@ Image Window_SaveCapture(int64 windowId, int left, int top, int width, int heigh
 	}
 	int screen = DefaultScreen(dpy);
 	if (windowId == 0)
-		windowId = RootWindow(dpy, screen);
+		windowId = (int64)RootWindow(dpy, screen);
 	else {
-		windowId = GetToplevelParent(dpy, windowId);
-		if (windowId < 0) {
+		windowId = (int64)GetToplevelParent(dpy, (unsigned long)windowId);
+		if (windowId == 0) {
 			SetX11ErrorHandler();
 			return Null;
 		}
 	}
 	
 	XWindowAttributes rc;
-  	if (!XGetWindowAttributes(dpy, windowId, &rc)) {
+  	if (!XGetWindowAttributes(dpy, (unsigned long)windowId, &rc)) {
 	  	XCloseDisplay(dpy);
 		SetX11ErrorHandler();
 		return Null;	
@@ -565,7 +564,7 @@ Image Window_SaveCapture(int64 windowId, int left, int top, int width, int heigh
 	if (height == -1)
 		height	= rc.height;
 		
-	XImage *image = XGetImage(dpy, windowId, left, top, width, height, XAllPlanes(), ZPixmap);
+	XImage *image = XGetImage(dpy, (unsigned long)windowId, left, top, (unsigned)width, (unsigned)height, XAllPlanes(), ZPixmap);
 	if (image == NULL) {
 		XCloseDisplay(dpy);
 		SetX11ErrorHandler();

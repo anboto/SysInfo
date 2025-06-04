@@ -80,13 +80,12 @@ bool GetBatteryInfo(bool &present/*, int &designCapacity, int &lastFullCapacity,
 	return true;
 }
 
-bool OpenCDTray(String drive)
-{
+bool OpenCDTray(String /*drive*/) {
 	String dummy;
 	return Sys("eject", dummy) > 0;	
 }
-bool CloseCDTray(String drive)
-{
+
+bool CloseCDTray(String /*drive*/) {
 	String dummy;
 	return Sys("eject -t", dummy) > 0;	
 }

@@ -221,7 +221,7 @@ bool Mouse_SetPos(int x, int y, int64 windowId) {
 
 void Mouse_FakeClick(int button, int press) {
 	_XDisplay *dpy = XOpenDisplay(NULL);
-	XTestFakeButtonEvent(dpy, button, press, CurrentTime);
+	XTestFakeButtonEvent(dpy, (unsigned)button, press, CurrentTime);
 	XFlush(dpy);
 	XCloseDisplay(dpy);
 }
@@ -240,8 +240,8 @@ void PressKeyVK(int key, _XDisplay *dpy = NULL) {
 			return;
 		local = true;
 	}
-	XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, key), True, CurrentTime);
-	XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, key), False, CurrentTime);
+	XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, (KeySym)key), True, CurrentTime);
+	XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, (KeySym)key), False, CurrentTime);
 	if (local) {
 		XFlush(dpy);
 		XCloseDisplay(dpy);
@@ -432,7 +432,11 @@ void Keyb_SendKeys(String text, long finalDelay, long delayBetweenKeys)
 	WString wtext(text);
 	for (int i = 0; i < wtext.GetCount(); ++i) {
 		bool vk = false;
+#if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
 		Sleep((unsigned)delayBetweenKeys);
+#else
+		Sleep(delayBetweenKeys);
+#endif
 		wchar c = (wchar)wtext[i];
 		if (c == '{')
 			inKey = true;
@@ -465,8 +469,10 @@ void Keyb_SendKeys(String text, long finalDelay, long delayBetweenKeys)
 #if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
 	for (int i = 0; i < virt.GetCount(); ++i)
 		PressKeyVK(virt[i], false, true);
-#endif
 	Sleep((unsigned)finalDelay);
+#else
+	Sleep(finalDelay);
+#endif
 }
 
 #endif

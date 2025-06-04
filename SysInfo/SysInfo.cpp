@@ -750,15 +750,16 @@ Array<NetAdapter> GetAdapterInfo() {
 	if(sck < 0) 
 		return res;
  
- 	char buf[8192] = {0};
- 	struct ifconf ifc = {0};
-	ifc.ifc_len = sizeof(buf);
-	ifc.ifc_buf = buf;
+ 	char buf[8192];
+ 	struct ifconf ifc;
+    ifc.ifc_len = sizeof(buf);
+    ifc.ifc_buf = buf;
+	
 	if(ioctl(sck, SIOCGIFCONF, &ifc) < 0) 
 		return res;
 
 	struct ifreq *ifr = ifc.ifc_req;
-	int nInterfaces = ifc.ifc_len / sizeof(struct ifreq);
+	int nInterfaces = int((unsigned long)ifc.ifc_len / sizeof(struct ifreq));
 	for(int i = 0; i < nInterfaces; i++) {
 		String MAC;
       
@@ -1368,13 +1369,13 @@ void GetWindowsList_Rec (_XDisplay *dpy, Window w, int depth, Array<int64> &wid)
 	if (depth > 3) // 1 is enough for Gnome. 2 is necessary for Xfce and Kde
 		return; 
 
-	wid.Add(w);
+	wid << int64(w);
 
 	Window root, parent; 
 	unsigned int nchildren; 
 	Window *children = NULL; 
 	if (XQueryTree (dpy, w, &root, &parent, &children, &nchildren))  {
-		for (int i = 0; i < nchildren; i++) {
+		for (int i = 0; i < int(nchildren); i++) {
 			XWindowAttributes windowattr;
 			XGetWindowAttributes(dpy, children[i], &windowattr);
 			if (windowattr.map_state == IsViewable)
@@ -1402,7 +1403,7 @@ Array<int64> GetWindowsList()
 	return ret;
 }
 
-void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &nameL, Array<String> &fileName, Array<String> &caption, bool getAll)
+void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &nameL, Array<String> &fileName, Array<String> &caption, bool /*getAll*/)
 {
 	SetSysInfoX11ErrorHandler();
 	_XDisplay *dpy = XOpenDisplay (NULL);
@@ -1414,17 +1415,17 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 	for (int i = 0; i < hWnd.GetCount(); ++i) {
 		// Get window name
 		XTextProperty tp;
-		if (XGetWMName(dpy, hWnd[i], &tp) == 0) 
+		if (XGetWMName(dpy, (unsigned long)hWnd[i], &tp) == 0) 
 	    	caption.Add("");
         else {
         	if (tp.nitems > 0) {
-           		int count = 0, i, ret;
+           		int count = 0, ret;
            		char **list = NULL;
           		ret = XmbTextPropertyToTextList(dpy, &tp, &list, &count);
             	if((ret == Success || ret > 0) && list != NULL) {
                 	String sret;
-              		for(i = 0; i < count; i++)
-              			sret << list[i]; 
+              		for(int ii = 0; ii < count; ii++)
+              			sret << list[ii]; 
               		XFreeStringList(list);
               		caption.Add(FromSystemCharset(sret));
           		} else 
@@ -1440,13 +1441,12 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 		else {
 			Atom type;        
 			int format;        
-			unsigned long nItems;        
-			unsigned long bytesAfter;        
+			unsigned long nItems, bytesAfter;        
 			unsigned char *propPID = 0;
-			if (0 == XGetWindowProperty(dpy, hWnd[i], atomPID, 0, 1024, false, XA_CARDINAL, &type, &format, &nItems, &bytesAfter, &propPID)) {
+			if (0 == XGetWindowProperty(dpy, (unsigned long)hWnd[i], atomPID, 0, 1024, false, XA_CARDINAL, &type, &format, &nItems, &bytesAfter, &propPID)) {
 				if(propPID != 0) {
 					pid = *((unsigned long *)propPID);
-					processId.Add(pid);
+					processId << int64(pid);
 					XFree(propPID);
 				} else
 					processId.Add(0LL);
@@ -1454,13 +1454,13 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 				processId.Add(0LL);
 		}
 		if (pid != 0L)
-			fileName.Add(GetProcessFileName(pid));
+			fileName.Add(GetProcessFileName(int64(pid)));
 		else
 			fileName.Add("");
 		// Name and class
 		XClassHint ch;
 		ch.res_name = ch.res_class = NULL; 	
-		Status status = XGetClassHint(dpy, hWnd[i], &ch);
+		Status status = XGetClassHint(dpy, (unsigned long)hWnd[i], &ch);
 		if (status != BadWindow) {
 			if (ch.res_name)
 				nameL.Add(ch.res_name);
@@ -1488,7 +1488,7 @@ bool WindowKill(int64 wid)
 		return false;
 
 	XSync (dpy, 0);			
-	XKillClient (dpy, wid);
+	XKillClient (dpy, (unsigned long)wid);
 	XSync (dpy, 0);
 	
 	XCloseDisplay (dpy);
@@ -1820,7 +1820,7 @@ bool Shutdown(String action) {
 #if !defined(__GNU_LIBRARY__)
 		reboot(0xCDEF0123);
 #elif __GNU_LIBRARY__ > 5
-		reboot(0xCDEF0123);
+		reboot(int(0xCDEF0123));
 #else
 		reboot(0xfee1dead, 672274793, 0xCDEF0123);
 #endif
@@ -2001,11 +2001,11 @@ bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom
 	Window rt;
 	int x, y;//, rx, ry; 
 	unsigned int width, height, bw, depth_; 
-	if (XGetGeometry(dpy, windowId, &rt, &x, &y, &width, &height, &bw, &depth_)) { 
+	if (XGetGeometry(dpy, (unsigned long)windowId, &rt, &x, &y, &width, &height, &bw, &depth_)) { 
 		left = x;
 		top = y;
-		right = x + width;
-		bottom = y + height;
+		right = x + (int)width;
+		bottom = y + (int)height;
 		ret = true;
 	}
 	XCloseDisplay (dpy);
@@ -2023,8 +2023,8 @@ bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom)
 	}
 	bool ret = false;
 
-	if (XMoveWindow(dpy, windowId, left, top)) {
-		if (!XResizeWindow(dpy, windowId, right-left, bottom-top))
+	if (XMoveWindow(dpy, (unsigned long)windowId, left, top)) {
+		if (!XResizeWindow(dpy, (unsigned long)windowId, (unsigned)(right-left), (unsigned)(bottom-top)))
 			ret = false;
 		else
 			ret = true;
@@ -2283,7 +2283,7 @@ static void GetPorts(SortedIndex<int> &ports, const char *file) {
 		String sport = line.GetText();
 		unsigned int port;
 		sscanf(~sport, "%x", &port);
-		ports.FindAdd(port);
+		ports.FindAdd((int)port);
 	}
 }
 #endif
