@@ -24,11 +24,9 @@ namespace Upp {
 #pragma float_control(except, on)
 #endif
 
-#if defined(PLATFORM_WIN32)	
 static void CrashPanic(const char *msg) {
 	throw Exc(msg);
 }
-#endif
 
 #ifndef flagDEBUG
 #define Panic CrashPanic
