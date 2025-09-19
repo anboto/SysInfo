@@ -254,7 +254,7 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 			int memoryLoad;
 			uint64 totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual;
 			if (GetMemoryInfo(memoryLoad, totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual))
-				Log(Format("Memory: %.1f Gb", totalPhys/1024./1024./1024.));
+				Log(Format("Memory: %.1f Gb", double(totalPhys)/1024./1024./1024.));
 			
 			String nam, mode;
 			Time time; 

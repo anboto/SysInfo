@@ -2333,7 +2333,7 @@ bool IsPortFree(int port) {
     sockaddr_in service;
     service.sin_family = AF_INET;
     service.sin_addr.s_addr = INADDR_ANY;
-    service.sin_port = htons(port);
+    service.sin_port = htons((u_short)port);
     
     bool ret = true;
     if(bind(socket_desc, reinterpret_cast<struct sockaddr *>(&service), sizeof(service)) < 0) 
