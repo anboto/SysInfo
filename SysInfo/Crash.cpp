@@ -110,6 +110,7 @@ LONG WINAPI CrashHandler::UnhandledHandler(EXCEPTION_POINTERS *exceptionPtrs) {
         default:
             msg << Format("Default Exception %ld", int64(exceptionCode));     break;
     	}
+    	EM().Log("CrashHandler: " + msg);
 		CrashPanic(msg);
 	}
 	return EXCEPTION_EXECUTE_HANDLER;
@@ -120,6 +121,7 @@ void __cdecl CrashHandler::TerminateHandler() {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("Terminate exception");
 		Panic("Terminate exception");
 	}
 }
@@ -128,6 +130,7 @@ void __cdecl CrashHandler::PureCallHandler() {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("Pure virtual function call");
 		Panic("Pure virtual function call");
 	}
 }
@@ -137,11 +140,14 @@ void __cdecl CrashHandler::InvalidParameterHandler(const wchar_t* expression, co
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		String str;
 		if (line == 0)
-			Panic("Invalid parameter");
+			str = "Invalid parameter";
 		else
-			Panic(Format("Invalid parameter in %s, function %s, file %s, line %d", AsString(expression),
-				AsString(function), AsString(file), int(line)));
+			str = Format("Invalid parameter in %s, function %s, file %s, line %d", AsString(expression),
+				AsString(function), AsString(file), int(line));
+		EM().Log(str);
+		Panic(str);
 	}
 }
 
@@ -149,6 +155,7 @@ void __cdecl CrashHandler::NewHandler() {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("Not enough memory available");
 		Panic("Not enough memory available");
 	}
 }
@@ -157,6 +164,7 @@ void CrashHandler::SigabrtHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGABRT: Process has aborted");
 		Panic("SIGABRT: Process has aborted");
 	}
 }
@@ -165,6 +173,7 @@ void CrashHandler::SigfpeHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGFPE: Floating point error");
 		Panic("SIGFPE: Floating point error");
 	}
 }
@@ -173,6 +182,7 @@ void CrashHandler::SigillHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGILL: Executable code seems corrupted");
 		Panic("SIGILL: Executable code seems corrupted");
 	}
 }
@@ -181,6 +191,7 @@ void CrashHandler::SigintHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGINT: Process has been asked to terminate by user");
 		Panic("SIGINT: Process has been asked to terminate by user");
 	}
 }
@@ -189,6 +200,7 @@ void CrashHandler::SigsegvHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGSEGV: Trying to read or write from/to a memory area that your process does not have access to");
 		Panic("SIGSEGV: Trying to read or write from/to a memory area that your process does not have access to");
 	}
 }
@@ -197,6 +209,7 @@ void CrashHandler::SigtermHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGTERM: Process has been asked to terminate by other application");
 		Panic("SIGTERM: Process has been asked to terminate by other application");
 	}
 }
@@ -205,6 +218,7 @@ void CrashHandler::SigbusHandler(int) {
 	ONCELOCK {
 		if (!GetCrashHandler().IsEnabled())
 			return;
+		EM().Log("SIGBUS: Process is trying to access memory that the CPU cannot physically address");
 		Panic("SIGBUS: Process is trying to access memory that the CPU cannot physically address");
 	}
 }
@@ -214,7 +228,6 @@ CrashHandler &GetCrashHandler() {
 	return clss;
 }
 
-#if defined(flagGUI) && defined(PLATFORM_WIN32)
 
 bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK) {
 	appname = title;
@@ -290,10 +303,24 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 void ErrorMonitor::Log(const char *str) {
 	if (!fileLog.IsEmpty()) 
 		FileStrAppend(fileLog, str + S("\n"));
+#if defined(flagGUI)
 	if (window)
 		window->AddStr(str);
+#endif
 	logList << str;
 }
+
+ErrorMonitor::~ErrorMonitor() {
+	if (isChild)
+		Log(Format("End: %`", GetSysTime()));	
+}
+
+ErrorMonitor &EM() {
+	static ErrorMonitor w;	
+	return w;
+}
+
+#if defined(flagGUI)
 
 void ErrorMonitor::OpenLogWindow() {
 	if (window)
@@ -302,11 +329,6 @@ void ErrorMonitor::OpenLogWindow() {
 	for (const String &str : logList)
 		window->AddStr(str);
 	window->OpenMain();
-}
-
-ErrorMonitor::~ErrorMonitor() {
-	if (isChild)
-		Log(Format("End: %`", GetSysTime()));	
 }
 
 bool ErrorMonitor::DefaultExitError(const char *appname, const Vector<String> &vs) {
@@ -321,7 +343,7 @@ bool ErrorMonitor::DefaultExitError(const char *appname, const Vector<String> &v
 			Add(dv___2.SetLabel(t_("Click Restart to restart or Cancel to end.")).HSizePosZ(8, 0).TopPosZ(4, 19));
 			Add(array.HSizePosZ(4, 4).VSizePosZ(30, 30));
 			
-			array.AddColumn("Please copy and report this log to the developers:");
+			array.AddColumn(t_("Please copy and report this log to the developers:"));
 			array.MultiSelect();
 			array.WhenBar = [&](Bar &menu) {ArrayCtrlWhenBar(menu, array);};
 		}
@@ -346,11 +368,6 @@ bool ErrorMonitor::DefaultExitError(const char *appname, const Vector<String> &v
 	return ok;
 }
 
-ErrorMonitor &EM() {
-	static ErrorMonitor w;	
-	return w;
-}
-
 ErrorMonitorLog::ErrorMonitorLog(Event<> whenClose) {
 	Sizeable();
 	Title("Log");
@@ -364,6 +381,6 @@ ErrorMonitorLog::ErrorMonitorLog(Event<> whenClose) {
 	
 	WhenClose = whenClose;
 }
+#endif
 
-#endif	
 }

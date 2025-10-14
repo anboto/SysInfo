@@ -61,8 +61,35 @@ private:
 
 CrashHandler &GetCrashHandler();
 
+#if defined(flagGUI)
+class ErrorMonitorLog;
+#endif
 
-#if defined(flagGUI) && defined(PLATFORM_WIN32)
+class ErrorMonitor {
+public:
+	bool Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK);
+	bool IsInit()	{return !appname.IsEmpty();}
+	~ErrorMonitor();
+	
+	void Log(const char *str);
+	void OpenLogWindow();
+	
+	static bool DefaultExitError(const char *title, const Vector<String> &);
+	
+private:
+	String fileLog;
+	String appname;
+	bool isChild = false;
+#if defined(flagGUI)
+	ErrorMonitorLog *window = nullptr;
+#endif
+	Vector<String> logList;
+};
+
+ErrorMonitor &EM();
+
+
+#if defined(flagGUI)
 
 class ErrorMonitorLog : public TopWindow {
 public:
@@ -82,27 +109,6 @@ private:
 	ArrayCtrl array;
 	Event<> WhenClose;
 };
-
-class ErrorMonitor {
-public:
-	bool Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK);
-	bool IsInit()	{return !appname.IsEmpty();}
-	~ErrorMonitor();
-	
-	void Log(const char *str);
-	void OpenLogWindow();
-	
-	static bool DefaultExitError(const char *title, const Vector<String> &);
-	
-private:
-	String fileLog;
-	String appname;
-	bool isChild = false;
-	ErrorMonitorLog *window = nullptr;
-	Vector<String> logList;
-};
-
-ErrorMonitor &EM();
 
 class ButtonEM : public Button {
 private:
@@ -136,6 +142,7 @@ private:
 #define TabCtrlEM	TabCtrl
 
 #endif
+
 }
 
 #endif
