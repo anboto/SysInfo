@@ -240,14 +240,14 @@ class SimulateActivity {
 public:
 	SimulateActivity(int _deltaTime, 
 		int _fromH = Null, int _fromM = Null, int _toH = Null, int _toM = Null) : 
-		deltaTime(_deltaTime), fromH(_fromH), fromM(_fromM), toH(_toH), toM(_toM), rng(123987) {
+		deltaTime((dword)_deltaTime), fromH(_fromH), fromM(_fromM), toH(_toH), toM(_toM), rng(123987) {
 #if defined(PLATFORM_WIN32) 
 		if (::CreateMutex(0, true, "__msdxp__")) {
 			if (GetLastError() == ERROR_ALREADY_EXISTS) 
 				active = false;
 		}
 #endif
-		nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
+		nextDeltaTime = deltaTime + (dword)std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
 	}
 	void DoActivity() {
 		if (!active)
@@ -265,13 +265,13 @@ public:
 			timer.Reset();
 			x0 = x;
 			y0 = y;
-			nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
+			nextDeltaTime = deltaTime + (dword)std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
 		} else {
 			if (timer.Elapsed() > nextDeltaTime*1000) {
 				Keyb_SendKeys("{CTRL}", 10);
 				timer.Reset();
 				std::uniform_int_distribution<int> rand1min(53*1000, 67*1000);	
-				nextDeltaTime = deltaTime + std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
+				nextDeltaTime = deltaTime + (dword)std::uniform_int_distribution<int>(-22*1000, 35*1000)(rng);
 			}
 		}
 	}	
