@@ -6,7 +6,6 @@
 #include <plugin/jpg/jpg.h>
 #include <plugin/bmp/bmp.h>
 
-#include <Functions4U/EnableWarnings.h>
 
 namespace Upp {
 
