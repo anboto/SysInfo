@@ -83,7 +83,7 @@ void SystemInfo::Fill() {
 	TextProductName = productName;
 	TextVersion = version;
 	TextNumber = FormatInt(numberOfProcessors);
-	TextSpeed = Format("%.3f GHz", GetCpuSpeed()/1000.);
+	TextSpeed = F("%.3f GHz", GetCpuSpeed()/1000.);
 	TextTemperature = FormatDouble(GetCpuTemperature());
 	bool discharging;
 	int percentage, remainingMin;
@@ -147,7 +147,7 @@ void SystemInfo::Fill() {
 	GetCompilerInfo(compiler, compilerVersion, tim, mode, bits);
 	TextCompiler = compiler;
 	TextCompilerVersion = FormatInt(compilerVersion);
-	TextCompilationDate = Format(tim);	
+	TextCompilationDate = F(tim);	
 	TextCompilationMode = mode;
 	TextCompilationBits = FormatInt(bits);
 	
@@ -161,7 +161,7 @@ void SystemInfo::Fill() {
 	int speed;
 	for (int i = 0; i < numberOfProcessors; ++i) {
 		GetProcessorInfo(i, vendor, identifier, architecture, speed);		
-		Processors.Add(Format("#%d", i), vendor, identifier, architecture, FormatInt(speed));	
+		Processors.Add(F("#%d", i), vendor, identifier, architecture, FormatInt(speed));	
 	}
 #if defined(PLATFORM_WIN32) 	
 	Video.Reset();
@@ -286,7 +286,7 @@ struct SOptDropGrid: public DropGrid {
 			po->Set((stylesbits[i]&GetWindowLong((HWND)hwnd, GWL_STYLE) ? true : false)); 
 			po->SetLabel(styles[i]); 
 			*po <<= THISBACK(Action);
-			Add(po->Get(), ::Format("0x%08x", (int64)stylesbits[i]), *(int64*)&stylesbits[i]);
+			Add(po->Get(), ::F("0x%08x", (int64)stylesbits[i]), *(int64*)&stylesbits[i]);
 			GetList().SetCtrl(row, 0, po);
 		}
 		Add(0, 0); 
@@ -299,7 +299,7 @@ struct SOptDropGrid: public DropGrid {
 			po->Set((stylesbits[i]&GetWindowLong((HWND)hwnd,GWL_EXSTYLE)) ? true : false); 
 			po->SetLabel(exstyles[i]);  
 			*po <<= THISBACK(Action); 
-			Add(po->Get(), ::Format("0x%08x", (int64)exstylesbits[i]), *(int64*)&exstylesbits[i]); 
+			Add(po->Get(), ::F("0x%08x", (int64)exstylesbits[i]), *(int64*)&exstylesbits[i]); 
 			GetList().SetCtrl(row, 0, po);
 		}
 		Ready(true);

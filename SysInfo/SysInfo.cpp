@@ -242,7 +242,7 @@ void GetBiosInfo(String &biosVersion, Date &biosReleaseDate, String &biosSerial)
 }
 
 bool GetProcessorInfo(int number, String &vendor, String &identifier, String &architecture, int &speed)	{
-	String strReg = Format("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\%d", number);
+	String strReg = F("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\%d", number);
 	vendor = FromSystemCharset(GetWinRegString("VendorIdentifier", strReg, HKEY_LOCAL_MACHINE));	
 	identifier = FromSystemCharset(GetWinRegString("ProcessorNameString", strReg, HKEY_LOCAL_MACHINE));	
 	architecture = FromSystemCharset(GetWinRegString("Identifier", strReg, HKEY_LOCAL_MACHINE));	
@@ -263,7 +263,7 @@ String GetMacAddressWMI() {
 */
 
 String inet_ntop4(const unsigned char *src) {
-	return Format("%d.%d.%d.%d", src[0], src[1], src[2], src[3]);
+	return F("%d.%d.%d.%d", src[0], src[1], src[2], src[3]);
 }
 
 String inet_ntop6(const unsigned char *src) {
@@ -310,7 +310,7 @@ String inet_ntop6(const unsigned char *src) {
 			ret.Cat(inet_ntop4(src + 12));
 			break;
 		}
-		ret.Cat(Format("%x", words[i]));
+		ret.Cat(F("%x", words[i]));
 	}
 	if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
 		ret.Cat(':');
@@ -817,7 +817,7 @@ Array<NetAdapter> GetAdapterInfo() {
     	if(ioctl(sck, SIOCGIFHWADDR, item) < 0) 
       		continue;
     
-    	MAC = Format("%02x:%02x:%02x:%02x:%02x:%02x",
+    	MAC = F("%02x:%02x:%02x:%02x:%02x:%02x",
 					(unsigned char)item->ifr_hwaddr.sa_data[0],
 					(unsigned char)item->ifr_hwaddr.sa_data[1],
 					(unsigned char)item->ifr_hwaddr.sa_data[2],
@@ -828,7 +828,7 @@ Array<NetAdapter> GetAdapterInfo() {
     	if(ioctl(sck, SIOCGENADDR, item) < 0) 
       		continue;
 
-    	MAC = Format("%02x:%02x:%02x:%02x:%02x:%02x",
+    	MAC = F("%02x:%02x:%02x:%02x:%02x:%02x",
 					(unsigned char)item->ifr_enaddr[0],
 					(unsigned char)item->ifr_enaddr[1],
 					(unsigned char)item->ifr_enaddr[2],
@@ -866,7 +866,7 @@ Array<NetAdapter> GetAdapterInfo() {
 		sdl = (struct sockaddr_dl *)(ifm + 1);
 		ptr = (unsigned char *)LLADDR(sdl);
 
-    	MAC = Format("%02x:%02x:%02x:%02x:%02x:%02x",
+    	MAC = F("%02x:%02x:%02x:%02x:%02x:%02x",
 						ptr[0], ptr[1], ptr[2],
 						ptr[3], ptr[4], ptr[5]);
 
@@ -1298,7 +1298,7 @@ bool GetProcessList(Array<int64> &pid, Array<String> &pNames)
 	if(ff.Search("/proc/*")) {
 		do {
 			if (IsInteger(ff.GetName())) {
-				String exe = Format("/proc/%s/exe", ff.GetName());
+				String exe = F("/proc/%s/exe", ff.GetName());
 				StringBuffer exeb;
 				exeb = exe;
 				char procName[2048];
@@ -1321,7 +1321,7 @@ Array<int64> GetProcessList()
 	if(ff.Search("/proc/*")) {
 		do {
 			if (IsInteger(ff.GetName())) {
-				String exe = Format("/proc/%s/exe", ff.GetName());
+				String exe = F("/proc/%s/exe", ff.GetName());
 				StringBuffer exeb;
 				exeb = exe;
 				char procName[2048];
@@ -1343,7 +1343,7 @@ String GetProcessName(int64 pid)
 String GetProcessFileName(int64 pid)
 {
 	String ret = "";
-	String exe = Format("/proc/%s/exe", FormatLong(pid));
+	String exe = F("/proc/%s/exe", FormatLong(pid));
 	StringBuffer exeb;
 	exeb = exe;
 	char procName[2048];
@@ -1359,7 +1359,7 @@ String GetProcessFileName(int64 pid)
 int64 GetProcessId() {return getpid();}
 
 int64 GetParentProcessId() {
-	return ScanInt64(Sys(Format("ps -o ppid= -p %ld", GetProcessId())));
+	return ScanInt64(Sys(F("ps -o ppid= -p %ld", GetProcessId())));
 }
 
 
@@ -1533,7 +1533,7 @@ bool SetProcessPriority(int64 pid, int priority)
 
 bool ProcessExists(int64 pid)
 {
-	return DirectoryExists(Format("/proc/%s", Sprintf("%ld", pid)));
+	return DirectoryExists(F("/proc/%s", Sprintf("%ld", pid)));
 }
 
 #endif
@@ -1728,7 +1728,7 @@ bool GetDriveInformation(String drive, String &type, String &volume, /*uint64 &s
 		
 	struct statfs buf;
 	if (0 == statfs(drive, &buf)) 
-		//puts(Format("%x", buf.f_type)); // Filesystem type
+		//puts(F("%x", buf.f_type)); // Filesystem type
 		maxName = buf.f_namelen; 	
 	else 
 		maxName = 0;
@@ -1849,27 +1849,28 @@ void GetCompilerInfoAux(String &name, int &version, Upp::Time &time, String &mod
 	
 	name = "";
 	version = 0;
-	#if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
-		#if defined(__MINGW32__)
+	#if defined(__clang__)
+		name = "clang";
+		version = __clang_major__*10000 + __clang_minor__*100 + __clang_patchlevel__;
+	#elif defined(__GNUC__)
+		#if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
 			name = "mingw";
-			version = __GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__;	// __VERSION__
-		#elif defined(COMPILER_MSC) 
-			name = "msc";
-			version = _MSC_FULL_VER;
-		#elif defined (__BORLANDC__)
-			name = "borlandc"
-			version = __BORLANDC__;
-		#elif defined (__WATCOMC__)
-			name = "watcomc"
-			version = __WATCOMC__;
+		#else
+			name = "gcc";
 		#endif
-	#elif defined (PLATFORM_POSIX)
-	    #if defined(__GNUC__)
-	    	name = "gnuc";
-	    	version = __GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__;
-	    #endif
-    #elif defined (__APPLE__) 
-    	// In a next future?
+		version = __GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__;
+	#elif defined(COMPILER_MSC) 
+		name = "msc";
+		version = _MSC_FULL_VER;
+	#elif defined(__INTEL_LLVM_COMPILER)
+		name = "intel";
+		version = __INTEL_LLVM_COMPILER;
+	#elif defined (__BORLANDC__)
+		name = "borlandc"
+		version = __BORLANDC__;
+	#elif defined (__WATCOMC__)
+		name = "watcomc"
+		version = __WATCOMC__;
 	#endif
 	#ifdef _DEBUG
 		mode = "debug";
@@ -2149,19 +2150,19 @@ Vector<String> SystemSignature::GetDiff(const SystemSignature &other) const {
 	Vector<String> list;
 	
 	if (userName != other.userName)
-		list << Format("User name: %s != %s", userName, other.userName);
+		list << F("User name: %s != %s", userName, other.userName);
 	if (manufacturer != other.manufacturer)
-		list << Format("Manufacturer: %s != %s", manufacturer, other.manufacturer);
+		list << F("Manufacturer: %s != %s", manufacturer, other.manufacturer);
 	if (productName != other.productName)
-		list << Format("ProductName: %s != %s", productName, other.productName);
+		list << F("ProductName: %s != %s", productName, other.productName);
 	if (version != other.version)
-		list << Format("Version: %s != %s", version, other.version);
+		list << F("Version: %s != %s", version, other.version);
 	if (mbSerial != other.mbSerial)
-		list << Format("MBSerial: %s != %s", mbSerial, other.mbSerial);
+		list << F("MBSerial: %s != %s", mbSerial, other.mbSerial);
 	if (numberOfProcessors != other.numberOfProcessors)
-		list << Format("NumberOfProcessors: %d != %d", numberOfProcessors, other.numberOfProcessors);
+		list << F("NumberOfProcessors: %d != %d", numberOfProcessors, other.numberOfProcessors);
 	if (hdSerial != other.hdSerial)
-		list << Format("HDSerial: %s != %s", hdSerial, other.hdSerial);
+		list << F("HDSerial: %s != %s", hdSerial, other.hdSerial);
 	bool sameNetworkAdapters = false;
 	for (int i = 0; i < netAdapters.GetCount(); ++i) {
 		if (TrimBoth(netAdapters[i].mac).IsEmpty())

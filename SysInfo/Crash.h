@@ -113,11 +113,11 @@ private:
 class ButtonEM : public Button {
 private:
 	virtual void LeftDown(Point p, dword d) {
-		EM().Log(Format("Button %s", GetLabel()));
+		EM().Log(F("Button %s", GetLabel()));
 		Button::LeftDown(p, d);
 	}
 	virtual void KeyPush() {
-		EM().Log(Format("Button %s", GetLabel()));
+		EM().Log(F("Button %s", GetLabel()));
 		Button::KeyPush();
 	}
 };
@@ -129,7 +129,7 @@ private:
 		if (prev_t < 0 || prev_t != actual_t) {
 			prev_t = actual_t;
 			if (GetCount() > 0 && GetItem(prev_t).IsEnabled()) 
-				EM().Log(Format("Tab %s", GetItem(prev_t).GetText()));
+				EM().Log(F("Tab %s", GetItem(prev_t).GetText()));
 		}
 		TabCtrl::Paint(draw);
 	}

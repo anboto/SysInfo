@@ -323,7 +323,7 @@ bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, Stri
    	if(!(bOsVersionInfoEx = GetVersion2(osvi)))
       	return false;
       		
-	kerVersion = Format("%d.%d", static_cast<int>(osvi.dwMajorVersion), static_cast<int>(osvi.dwMinorVersion));
+	kerVersion = F("%d.%d", static_cast<int>(osvi.dwMajorVersion), static_cast<int>(osvi.dwMinorVersion));
 	kernel = "Windows";
 
    	if (VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMajorVersion > 4) {
@@ -513,9 +513,9 @@ bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, Stri
       	} 
        	// Include service pack (if any) and build number.
       	if(osvi.wServicePackMajor > 0)
-			kerVersion.Cat(Format(" %s", osvi.szCSDVersion));
+			kerVersion.Cat(F(" %s", osvi.szCSDVersion));
 
-      	kerVersion.Cat(Format(" (Build %d)", static_cast<int>(osvi.dwBuildNumber)));
+      	kerVersion.Cat(F(" (Build %d)", static_cast<int>(osvi.dwBuildNumber)));
  	} else if (osvi.dwPlatformId == 1) {
  		switch(osvi.dwMinorVersion) {
  		case 0:
@@ -634,7 +634,7 @@ bool GetOsInfo(String &kernel, String &kerVersion, String &kerArchitecture, Stri
 			} else if (desktopStr.Find("xfce") >= 0) {
 				desktopStr.GoAfter("_dt_save_mode", "=");
 				desktop = desktopStr.GetText();
-				StringParse xfceVersion = Sys(Format("%s-about --version", desktop));
+				StringParse xfceVersion = Sys(F("%s-about --version", desktop));
 				while (true) {
 					String strver = xfceVersion.GetText();
 					if (atof(strver) > 0) {

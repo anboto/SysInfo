@@ -54,7 +54,7 @@ GUI_APP_MAIN {
 	GetCrashHandler().Enable();
 	#ifndef flagDEBUG
 	InstallPanicMessageBox([](const char *title, const char *text) {
-		EM().Log(Format("%s: %s", title, text));
+		EM().Log(F("%s: %s", title, text));
 		throw Exc(text);
 	});
 	if (EM().Init("CrashHandler", "CrashHandler", EM().DefaultExitError, Null))

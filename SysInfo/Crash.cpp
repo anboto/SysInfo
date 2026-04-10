@@ -107,7 +107,7 @@ LONG WINAPI CrashHandler::UnhandledHandler(EXCEPTION_POINTERS *exceptionPtrs) {
         case EXCEPTION_BREAKPOINT:
             msg << "Exception: Breakpoint";					break;    
         default:
-            msg << Format("Default Exception %ld", int64(exceptionCode));     break;
+            msg << F("Default Exception %ld", int64(exceptionCode));     break;
     	}
     	EM().Log("CrashHandler: " + msg);
 		CrashPanic(msg);
@@ -143,7 +143,7 @@ void __cdecl CrashHandler::InvalidParameterHandler(const wchar_t* expression, co
 		if (line == 0)
 			str = "Invalid parameter";
 		else
-			str = Format("Invalid parameter in %s, function %s, file %s, line %d", AsString(expression),
+			str = F("Invalid parameter in %s, function %s, file %s, line %d", AsString(expression),
 				AsString(function), AsString(file), int(line));
 		EM().Log(str);
 		Panic(str);
@@ -237,12 +237,12 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 	}
 
 	String name;
-	if (GetEnv(Format("AnbotoWD%ld", GetParentProcessId())) != "1") {
+	if (GetEnv(F("AnbotoWD%ld", GetParentProcessId())) != "1") {
 		isChild = false;
-		name = Format("AnbotoWD%ld", GetProcessId());
+		name = F("AnbotoWD%ld", GetProcessId());
 	} else {
 		isChild = true;
-		name = Format("AnbotoWD%ld", GetParentProcessId());
+		name = F("AnbotoWD%ld", GetParentProcessId());
 	}
 	
 	fileLog = AppendFileNameX(sfolder, name + ".log");
@@ -261,20 +261,20 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 		while (restart) {
 			String kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion;
 			if (GetOsInfo(kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion)) 
-				Log(Format("Kernel: %s, Version: %s, Architecture: %s, Distro: %s, Version: %s, Desktop: %s, Version: %s", kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion));
+				Log(F("Kernel: %s, Version: %s, Architecture: %s, Distro: %s, Version: %s, Desktop: %s, Version: %s", kernel, kerVersion, kerArchitecture, distro, distVersion, desktop, deskVersion));
 			
 			int memoryLoad;
 			uint64 totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual;
 			if (GetMemoryInfo(memoryLoad, totalPhys, freePhys, totalPageFile, freePageFile, totalVirtual, freeVirtual))
-				Log(Format("Memory: %.1f Gb", double(totalPhys)/1024./1024./1024.));
+				Log(F("Memory: %.1f Gb", double(totalPhys)/1024./1024./1024.));
 			
 			String nam, mode;
 			Time time; 
 			int version, bits;
 			GetCompilerInfo(nam, version, time, mode, bits);	
-			Log(Format("Compiler: %s, Version: %d, Time: %`, mode: %s, bits: %d", nam, version, time, mode, bits));
+			Log(F("Compiler: %s, Version: %d, Time: %`, mode: %s, bits: %d", nam, version, time, mode, bits));
 			
-			int64 childpid = LaunchCommand(Format("\"%s\" %s", GetExeFilePath(), args));
+			int64 childpid = LaunchCommand(F("\"%s\" %s", GetExeFilePath(), args));
 			
 			while(ProcessExists(childpid)) 
 				Sleep(500);
@@ -294,14 +294,14 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 		}
 		return true;
 	} else 
-		Log(Format("Start: %`", GetSysTime()));
+		Log(F("Start: %`", GetSysTime()));
 
 	return false;
 }
 
 void ErrorMonitor::Log(const char *str) {
 	if (!fileLog.IsEmpty()) 
-		FileStrAppend(fileLog, str + S("\n"));
+		FileStrAppend(fileLog, str + F("\n"));
 #if defined(flagGUI)
 	if (window)
 		window->AddStr(str);
@@ -311,7 +311,7 @@ void ErrorMonitor::Log(const char *str) {
 
 ErrorMonitor::~ErrorMonitor() {
 	if (isChild)
-		Log(Format("End: %`", GetSysTime()));	
+		Log(F("End: %`", GetSysTime()));	
 }
 
 ErrorMonitor &EM() {
@@ -334,7 +334,7 @@ bool ErrorMonitor::DefaultExitError(const char *appname, const Vector<String> &v
 	struct DialogError : TopWindow {
 		DialogError(const char *appname) {
 			Sizeable();
-			Title(Format(t_("Problem detected in %s"), appname));
+			Title(F(t_("Problem detected in %s"), appname));
 			SetRect(0, 0, Zx(320), Zy(200));
 			
 			Add(butCancel.SetLabel(t_("Cancel")).RightPosZ(8, 56).BottomPosZ(5, 20));
