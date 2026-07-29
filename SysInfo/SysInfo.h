@@ -30,7 +30,6 @@ struct NetAdapter : DeepCopyOption<NetAdapter> {
 	void Serialize(Stream &stream);
 	void Copy(const NetAdapter& src);
 	NetAdapter(const NetAdapter& src, int) 	{Copy(src);}
-	//NetAdapter(const NetAdapter& src) 		{Copy(src);}
 	NetAdapter() {}
 };
 
