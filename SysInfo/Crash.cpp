@@ -40,12 +40,13 @@ CrashHandler::CrashHandler() {
 	
 	SetUnhandledExceptionFilter(UnhandledHandler);    
 	_set_purecall_handler(PureCallHandler);    
-	_set_invalid_parameter_handler(InvalidParameterHandler); 
-	
+	_set_invalid_parameter_handler(InvalidParameterHandler); 	
 #else
+	#if !defined(__APPLE__)
  	feclearexcept(FE_ALL_EXCEPT); 
 	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 	signal(SIGBUS, SigbusHandler);
+	#endif
 #endif
 
 	std::set_new_handler(NewHandler);
