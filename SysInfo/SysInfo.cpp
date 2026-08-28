@@ -1091,17 +1091,24 @@ int64 GetParentProcessId() {
 }
 
 bool ProcessExists(int64 processID) {
-	String ret;
-	
-    // Get a handle to the process.
-    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, DWORD(processID));
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) 
+    	return false;
 
-    // Get the process name.
-    if (hProcess != NULL) {
-         CloseHandle(hProcess);
-         return true;
-    } else
-        return false;
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    bool exists = false;
+    if (Process32First(hSnapshot, &pe32)) {
+        do {
+            if (pe32.th32ProcessID == static_cast<DWORD>(processID)) {
+                exists = true;
+                break;
+            }
+        } while (Process32Next(hSnapshot, &pe32));
+    }
+    CloseHandle(hSnapshot);
+    return exists;
 }
         
 bool UnSetEnv(const char *name) {

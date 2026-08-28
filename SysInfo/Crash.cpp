@@ -231,6 +231,8 @@ CrashHandler &GetCrashHandler() {
 
 bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(const char *title, const Vector<String>&)> ExitError, Function <void()> ExitOK) {
 	appname = title;
+	SetAppName(F("%s watchdog", appname));
+	
 	String sfolder(folder);
 	if (!DirectoryExists(sfolder)) {
 		sfolder = AppendFileNameX(GetAppDataFolder(), folder);
