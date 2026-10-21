@@ -1,7 +1,5 @@
 description "OS, hardware and Desktop handling functions\377B44,169,203";
 
-noblitz;
-
 uses
 	Core,
 	Functions4U;
@@ -20,6 +18,7 @@ file
 	SysInfo.cpp,
 	SysInfo.h,
 	SysInfo_in.h,
+	build_info.cpp options(BUILDER_OPTION) NOBLITZ,
 	OS.cpp,
 	OSwin.c,
 	OSwin.h,

@@ -1,0 +1,7 @@
+macro BeforeBuildLinux : "Add timestamp Linux" {
+    Execute("touch BuildTime.cpp");
+}
+
+macro BeforeBuildWindows : "Add timestamp Windows" {
+    Execute("copy /b BuildTime.cpp+,, BuildTime.cpp");
+}

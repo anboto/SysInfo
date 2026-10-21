@@ -2,6 +2,9 @@
 // Copyright 2021 - 2022, the Anboto author and contributors
 #include "SysInfo_in.h"
 
+#define TFILE <SysInfo/SysInfo.t>
+#include <Core/t.h>
+
 #if defined(PLATFORM_WIN32)
 #include <iphlpapi.h>
 #endif
@@ -25,9 +28,6 @@
 
 
 namespace Upp {
-
-#define TFILE <SysInfo/SysInfo.t>
-#include <Core/t.h>
 
 #ifdef COMPILER_MSC
 #pragma comment(lib, "ws2_32.lib")
@@ -250,17 +250,6 @@ bool GetProcessorInfo(int number, String &vendor, String &identifier, String &ar
 	
 	return true;
 }
-/*
-String GetMacAddressWMI() {
-	Value vmac;
-	if (!GetWMIInfo("Win32_NetworkAdapterConfiguration", "MacAddress", vmac)) 
-		return Null;
-	String mac = Trim(vmac);	
-	if (mac.GetCount() > 0)
-		return mac;
-	return Null;
-}
-*/
 
 String inet_ntop4(const unsigned char *src) {
 	return F("%d.%d.%d.%d", src[0], src[1], src[2], src[3]);
@@ -396,35 +385,6 @@ Array <NetAdapter> GetAdapterInfo() {
 	}
 	return ret;
 }
-
-/*bool GetNetworkInfo(String &name, String &domain)
-{
-   	LPWKSTA_INFO_100 pBuf = NULL;
-
-   	NET_API_STATUS nStatus = NetWkstaGetInfo(NULL, 100, (LPBYTE *)&pBuf);
-
-	bool ret = true;
-   	if (nStatus == NERR_Success) {
-       	name = FromSystemCharsetW(pBuf->wki100_computername);
-   		domain = FromSystemCharsetW(pBuf->wki100_langroup);
-   	}  else
-      	ret = false;
-
-   	if (pBuf != NULL)
-      	NetApiBufferFree(pBuf);
-
-	if (name.IsEmpty() || !ret) {	// Second try
-    	char path[256] = "";
-    	WSADATA wsaData;
-    	WSAStartup(MAKEWORD(2, 2), &wsaData);
-    	gethostname(path, sizeof(path));
-    	name = path;
-    	domain = "";
-    	WSACleanup();		
-    	ret = true;
-	}
-   	return ret;
-}*/
 
 String GetHDSerial() {
 	Value vmbSerial;
@@ -575,10 +535,8 @@ bool GetNetworkInfo(String &name, String &domain, String &ip4, String &ip6) {
 	return true;	
 }	
 
-
 #if defined (PLATFORM_POSIX)
-void GetSystemInfo(String &manufacturer, String &productName, String &version, int &numberOfProcessors, String &mbSerial)
-{
+void GetSystemInfo(String &manufacturer, String &productName, String &version, int &numberOfProcessors, String &mbSerial) {
 	manufacturer = LoadFile_Safe("/sys/devices/virtual/dmi/id/board_vendor");
 	productName = LoadFile_Safe("/sys/devices/virtual/dmi/id/board_name");
 	version = LoadFile_Safe("/sys/devices/virtual/dmi/id/product_version");
@@ -594,16 +552,14 @@ void GetSystemInfo(String &manufacturer, String &productName, String &version, i
 	} 
 }
 
-void GetBiosInfo(String &biosVersion, Date &biosReleaseDate, String &biosSerial)
-{
+void GetBiosInfo(String &biosVersion, Date &biosReleaseDate, String &biosSerial) {
 	String biosVendor = LoadFile_Safe("/sys/devices/virtual/dmi/id/bios_vendor");
 	biosVersion = LoadFile_Safe("/sys/devices/virtual/dmi/id/bios_version");
 	StrToDate(biosReleaseDate, LoadFile_Safe("/sys/devices/virtual/dmi/id/bios_date"));
 	biosSerial = LoadFile_Safe("/sys/devices/virtual/dmi/id/chassis_serial");
 }
 
-bool GetProcessorInfo(int number, String &vendor, String &identifier, String &architecture, int &speed)	
-{
+bool GetProcessorInfo(int number, String &vendor, String &identifier, String &architecture, int &speed)	{
 	StringParse cpu(LoadFile_Safe("/proc/cpuinfo"));
 	
 	int cpuNumber;
@@ -697,48 +653,6 @@ double GetCpuTemperature() {
 		temp = GetCpuTemperatureSensors();	
 	return temp;
 }
-
-
-/*
-Array <NetAdapter> GetAdapterInfo() {
-	Array <NetAdapter> ret;
-	
-	StringParse data = Sys("ifconfig -a");
-	for (StringParse line = data.GetLine(); !data.Eof(); line = data.GetLine()) {
-		NetAdapter &adapter = ret.Add();
-		String str = line.GetText();				
-		if (str.Find("eth") >= 0)
-			adapter.type = "ETHERNET";
-		else if (str.Find("lo") >= 0)
-			adapter.type = "SOFTWARE_LOOPBACK";
-		else if (str.Find("ppp") >= 0)
-			adapter.type = "MODEM";		
-		else if (str.Find("hci") >= 0)
-			adapter.type = "BLUETOOTH";
-		else if (str.Find("tr") >= 0)
-			adapter.type = "TOKENRING";
-		else if (str.Find("vbox") >= 0 || str.Find("wifi") >= 0 || str.Find("ath") >= 0)
-			adapter.type = "VIRTUALBOX";
-		else if (str.Find("wlan") >= 0)
-			adapter.type = "IEEE80211";
-		else			
-			adapter.type = "OTHER";
-		line.GoAfter(":");
-		int pos = line.GetPos();
-		int npos = line.Find("  ", pos);
-		if (npos >= 0) {
-		 	adapter.fullname = line.Mid(pos, npos-pos);
-		 	line.SetPos(npos+1);
-		}
-		if (line.GetText() != "") 
-			adapter.mac = ToUpper(Trim(line.GetText()));
-		do {
-			data.GoAfter("\n");
-		} while (data[data.GetPos()] == ' ');
-	}
-	return ret;
-}
-*/
 
 #ifndef PLATFORM_OSX
 
@@ -887,8 +801,6 @@ String GetHDSerial() {
 
 #endif
 
-/////////////////////////////////////////////////////////////////////
-// Memory Info
 
 #if defined(PLATFORM_WIN32)
 
@@ -942,9 +854,6 @@ bool GetMemoryInfo(
 }
 #endif
 
-
-/////////////////////////////////////////////////////////////////////
-// Process list
 
 #if defined(PLATFORM_WIN32) 
 
@@ -1151,9 +1060,7 @@ int GetProcessCPUUsage(int64 pid) {
 	return cpu;
 }
 
-
-BOOL CALLBACK EnumGetWindowsList(HWND hWnd, LPARAM lParam) 
-{
+BOOL CALLBACK EnumGetWindowsList(HWND hWnd, LPARAM lParam)  {
 	if (!hWnd)
 		return TRUE;		// Not a window
 	if (GetParent(hWnd) != 0)
@@ -1163,8 +1070,7 @@ BOOL CALLBACK EnumGetWindowsList(HWND hWnd, LPARAM lParam)
 	return TRUE;
 }
 
-void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &name, Array<String> &fileName, Array<String> &caption, bool getAll)
-{
+void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &name, Array<String> &fileName, Array<String> &caption, bool getAll) {
 	HANDLE hProcess;
 	DWORD dwProcessId;
 	HINSTANCE hInstance;
@@ -1208,15 +1114,13 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 	}
 }
 
-Array<int64> GetWindowsList()
-{
+Array<int64> GetWindowsList() {
 	Array<int64> ret;
 	EnumWindows(EnumGetWindowsList, reinterpret_cast<LPARAM>(&ret));	
 	return ret;
 }
 
-BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam)
-{
+BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam) {
 	DWORD dwID;
   	GetWindowThreadProcessId(hwnd, &dwID);
   	if(dwID == DWORD(lParam))
@@ -1265,8 +1169,7 @@ int GetProcessPriority(int64 pid) {
   	return (int)priority;	
 }
  
-bool SetProcessPriority(int64 pid, int priority)
-{
+bool SetProcessPriority(int64 pid, int priority) {
 	HANDLE hProc = ::OpenProcess(PROCESS_SET_INFORMATION , FALSE, DWORD(pid));
   	if(hProc == NULL)
     	return false;
@@ -1290,8 +1193,7 @@ bool SetProcessPriority(int64 pid, int priority)
 #endif
 #ifdef PLATFORM_POSIX			 //Check with ps
 
-bool IsInteger(String s)
-{
+bool IsInteger(String s) {
 	for (int i = 0; i < s.GetCount(); ++i) {
 		if (!isdigit(s[i]))
 			return false;
@@ -1299,8 +1201,7 @@ bool IsInteger(String s)
 	return true;
 }
 
-bool GetProcessList(Array<int64> &pid, Array<String> &pNames)
-{
+bool GetProcessList(Array<int64> &pid, Array<String> &pNames) {
 	FindFile ff;
 	if(ff.Search("/proc/*")) {
 		do {
@@ -1321,8 +1222,7 @@ bool GetProcessList(Array<int64> &pid, Array<String> &pNames)
 	return true;
 }
 
-Array<int64> GetProcessList()
-{
+Array<int64> GetProcessList() {
 	FindFile ff;
 	Array<int64> pid; 
 	if(ff.Search("/proc/*")) {
@@ -1341,14 +1241,12 @@ Array<int64> GetProcessList()
 	return pid;
 }
 
-String GetProcessName(int64 pid)
-{
+String GetProcessName(int64 pid) {
 	return GetFileName(GetProcessFileName(pid));
 }
 
 // ls -l /proc/%d/fd gets also the files opened by the process
-String GetProcessFileName(int64 pid)
-{
+String GetProcessFileName(int64 pid) {
 	String ret = "";
 	String exe = F("/proc/%s/exe", FormatLong(pid));
 	StringBuffer exeb;
@@ -1370,8 +1268,7 @@ int64 GetParentProcessId() {
 }
 
 
-void GetWindowsList_Rec (_XDisplay *dpy, Window w, int depth, Array<int64> &wid) 
-{ 
+void GetWindowsList_Rec (_XDisplay *dpy, Window w, int depth, Array<int64> &wid)  { 
 	if (depth > 3) // 1 is enough for Gnome. 2 is necessary for Xfce and Kde
 		return; 
 
@@ -1393,8 +1290,7 @@ void GetWindowsList_Rec (_XDisplay *dpy, Window w, int depth, Array<int64> &wid)
 	return; 
 }
 
-Array<int64> GetWindowsList()
-{
+Array<int64> GetWindowsList() {
 	Array<int64> ret;	
 	SetSysInfoX11ErrorHandler();
 	
@@ -1409,8 +1305,7 @@ Array<int64> GetWindowsList()
 	return ret;
 }
 
-void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &nameL, Array<String> &fileName, Array<String> &caption, bool /*getAll*/)
-{
+void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &nameL, Array<String> &fileName, Array<String> &caption, bool /*getAll*/) {
 	SetSysInfoX11ErrorHandler();
 	_XDisplay *dpy = XOpenDisplay (NULL);
 	if (!dpy) {
@@ -1484,8 +1379,7 @@ void GetWindowsList(Array<int64> &hWnd, Array<int64> &processId, Array<String> &
 	return;
 }    
 
-bool WindowKill(int64 wid)
-{
+bool WindowKill(int64 wid) {
 	if (wid == 0)
 		return false;
 	
@@ -1502,8 +1396,7 @@ bool WindowKill(int64 wid)
 }
 
 // Also possible to stop or cont
-bool ProcessTerminate(int64 pid, int timeout)
-{
+bool ProcessTerminate(int64 pid, int timeout) {
 	if (!ProcessExists(pid))
 		return false;
 	long wid = GetWindowIdFromProcessId(pid);		// Just in case
@@ -1523,14 +1416,12 @@ bool ProcessTerminate(int64 pid, int timeout)
 	return WindowKill(wid);
 }
 
-int GetProcessPriority(int64 pid)
-{
+int GetProcessPriority(int64 pid) {
 	int priority = getpriority(PRIO_PROCESS, pid);
 	return 10 - (priority + 20)/4;		// Rescale -20/20 to 10/0
 }
 
-bool SetProcessPriority(int64 pid, int priority)
-{
+bool SetProcessPriority(int64 pid, int priority) {
 	priority = 20 - 4*priority;
 	if (0 == setpriority(PRIO_PROCESS, pid, priority))
  		return true;	
@@ -1538,15 +1429,13 @@ bool SetProcessPriority(int64 pid, int priority)
 		return false;
 }
 
-bool ProcessExists(int64 pid)
-{
+bool ProcessExists(int64 pid) {
 	return DirectoryExists(F("/proc/%s", Sprintf("%ld", pid)));
 }
 
 #endif
 
-int64 GetWindowIdFromCaption(String windowCaption, bool exactMatch)
-{
+int64 GetWindowIdFromCaption(String windowCaption, bool exactMatch) {
 	Array<int64> wid, pid;
 	Array<String> name, fileName, caption;
 	GetWindowsList(wid, pid, name, fileName, caption);
@@ -1562,8 +1451,7 @@ int64 GetWindowIdFromCaption(String windowCaption, bool exactMatch)
 	return -1;
 } 
 
-int64 GetProcessIdFromWindowCaption(String windowCaption, bool exactMatch)
-{
+int64 GetProcessIdFromWindowCaption(String windowCaption, bool exactMatch) {
 	Array<int64> wid, pid;
 	Array<String> name, fileName, caption;
 	GetWindowsList(wid, pid, name, fileName, caption);
@@ -1579,8 +1467,7 @@ int64 GetProcessIdFromWindowCaption(String windowCaption, bool exactMatch)
 	return -1;
 }    
 
-int64 GetProcessIdFromWindowId(int64 _wId)
-{
+int64 GetProcessIdFromWindowId(int64 _wId) {
 	Array<int64> wId, pid;
 	Array<String> name, fileName, caption;
 	GetWindowsList(wId, pid, name, fileName, caption);
@@ -1591,8 +1478,7 @@ int64 GetProcessIdFromWindowId(int64 _wId)
 	return -1;
 } 
 
-int64 GetWindowIdFromProcessId(int64 _pid)
-{
+int64 GetWindowIdFromProcessId(int64 _pid) {
 	Array<int64> wId, pid;
 	Array<String> name, fileName, caption;
 	GetWindowsList(wId, pid, name, fileName, caption);
@@ -1603,8 +1489,7 @@ int64 GetWindowIdFromProcessId(int64 _pid)
 	return -1;
 } 
 
-int64 GetProcessIdFromName(String name) 
-{
+int64 GetProcessIdFromName(String name) {
 	Array<int64> pid;
 	Array<String> pNames;
 	if (!GetProcessList(pid, pNames))
@@ -1618,15 +1503,12 @@ int64 GetProcessIdFromName(String name)
 }
 
 
-/////////////////////////////////////////////////////////////////////
-// Drives list
 #if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
 
 bool GetDriveSpace(String drive, 
 	uint64 &freeBytesUser, 	// Total number of free bytes on a disk that are available to the user who is associated with the calling thread.
 	uint64 &totalBytesUser, // Total number of bytes on a disk that are available to the user who is associated with the calling thread.
-	uint64 &totalFreeBytes)	// Total number of free bytes on a disk.
-{
+	uint64 &totalFreeBytes)	{//Total number of free bytes on a disk.
 	StringBuffer sb(drive);	
 	ULARGE_INTEGER _freeBytesUser, _totalBytesUser, _totalFreeBytes;
 	
@@ -1639,8 +1521,7 @@ bool GetDriveSpace(String drive,
 }
 
 // return true if mounted
-bool GetDriveInformation(String drive, String &type, String &volume, /*uint64 &serial, */int &maxName, String &fileSystem)
-{
+bool GetDriveInformation(String drive, String &type, String &volume, /*uint64 &serial, */int &maxName, String &fileSystem) {
 	StringBuffer sb(drive);	
 	
 	switch (::GetDriveType(sb)) {
@@ -1687,8 +1568,7 @@ bool GetDriveSpace(String drive,
 	//uint64 &totalBytes,	// To determine the total number of bytes on a disk or volume, use IOCTL_DISK_GET_LENGTH_INFO.
 	uint64 &freeBytesUser, 	// Total number of free bytes on a disk that are available to the user who is associated with the calling thread.
 	uint64 &totalBytesUser, // Total number of bytes on a disk that are available to the user who is associated with the calling thread.
-	uint64 &totalFreeBytes)	// Total number of free bytes on a disk.
-{
+	uint64 &totalFreeBytes)	{//Total number of free bytes on a disk.
 	freeBytesUser = totalBytesUser = totalFreeBytes = 0;
 	
 	StringParse space = Sys("df -T");
@@ -1706,9 +1586,8 @@ bool GetDriveSpace(String drive,
 }
 
 #ifndef PLATFORM_OSX
-// return true if mounted
-bool GetDriveInformation(String drive, String &type, String &volume, /*uint64 &serial, */int &maxName, String &fileSystem)
-{
+// Return true if mounted
+bool GetDriveInformation(String drive, String &type, String &volume, /*uint64 &serial, */int &maxName, String &fileSystem) {
 	StringParse info = Sys("mount -l");
 	if (info  == "")
 		return false;
@@ -1851,9 +1730,7 @@ bool Shutdown(String action) {
 #endif
 
 
-void GetCompilerInfoAux(String &name, int &version, Upp::Time &time, String &mode, int &bits, const char *, const char *) {	
-	time = FileGetTime(GetExeFilePath());		
-	
+void GetCompilerInfo(String &name, int &version, Upp::Time &time, String &mode, int &bits) {	
 	name = "";
 	version = 0;
 	#if defined(__clang__)
@@ -1893,13 +1770,13 @@ void GetCompilerInfoAux(String &name, int &version, Upp::Time &time, String &mod
 	#else
 		bits = 32;
 	#endif	
-}
 
+	time = Time(bm_YEAR, bm_MONTH, bm_DAY, bm_HOUR, bm_MINUTE, bm_SECOND);
+}
 
 #if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
 
-bool PutWindowPlacement(HWND hwnd, RECT rcNormalPosition, POINT ptMinPosition, POINT ptMaxPosition, long showcmd, long flags)
-{
+bool PutWindowPlacement(HWND hwnd, RECT rcNormalPosition, POINT ptMinPosition, POINT ptMaxPosition, long showcmd, long flags) {
     WINDOWPLACEMENT place;
         
     place.ptMinPosition = ptMinPosition;
@@ -1911,8 +1788,7 @@ bool PutWindowPlacement(HWND hwnd, RECT rcNormalPosition, POINT ptMinPosition, P
     return ::SetWindowPlacement(hwnd, &place);
 }
 
-bool TakeWindowPlacement(HWND hwnd, RECT &rcNormalPosition, POINT &ptMinPosition, POINT &ptMaxPosition, long &showcmd)
-{
+bool TakeWindowPlacement(HWND hwnd, RECT &rcNormalPosition, POINT &ptMinPosition, POINT &ptMaxPosition, long &showcmd) {
     WINDOWPLACEMENT place;
     
     place.length = sizeof(place);
@@ -1928,8 +1804,7 @@ bool TakeWindowPlacement(HWND hwnd, RECT &rcNormalPosition, POINT &ptMinPosition
     return ret;
 }
 
-int Window_GetStatus(int64 windowId) 
-{
+int Window_GetStatus(int64 windowId)  {
     WINDOWPLACEMENT place;
     
     place.length = sizeof(place);
@@ -1945,8 +1820,7 @@ int Window_GetStatus(int64 windowId)
     return Null;
 }
 
-bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom)
-{
+bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom) {
 	RECT rcNormalPosition = {0, 0, 0, 0};
     POINT ptMinPosition, ptMaxPosition;
     long showcmd;	
@@ -1961,8 +1835,7 @@ bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom
 	return true;
 }
 
-bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom)
-{
+bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom) {
 	RECT rcNormalPosition;
     POINT ptMinPosition, ptMaxPosition;
     long showcmd;	
@@ -1977,18 +1850,15 @@ bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom)
 	return PutWindowPlacement(reinterpret_cast<HWND>(windowId), rcNormalPosition, ptMinPosition, ptMaxPosition, showcmd, 0);
 }
 
-void Window_Bottom(int64 windowId)
-{
+void Window_Bottom(int64 windowId) {
 	::SetWindowPos(reinterpret_cast<HWND>(windowId), HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
-void Window_Top(int64 windowId)
-{
+void Window_Top(int64 windowId) {
 	::SetWindowPos(reinterpret_cast<HWND>(windowId), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
-void Window_TopMost(int64 windowId)
-{
+void Window_TopMost(int64 windowId) {
 	::SetWindowPos(reinterpret_cast<HWND>(windowId), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
@@ -1996,8 +1866,7 @@ void Window_TopMost(int64 windowId)
 
 #ifdef PLATFORM_POSIX
 
-bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom)
-{
+bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom) {
 	SetSysInfoX11ErrorHandler();
 	_XDisplay *dpy = XOpenDisplay (NULL);
 	if (!dpy) {
@@ -2020,8 +1889,7 @@ bool Window_GetRect(int64 windowId, int &left, int &top, int &right, int &bottom
 	return ret; 
 }
 
-bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom)
-{
+bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom) {
 	SetSysInfoX11ErrorHandler();
 	_XDisplay *dpy = XOpenDisplay (NULL);
 	if (!dpy) {
@@ -2046,8 +1914,7 @@ bool Window_SetRect(int64 windowId, int left, int top, int right, int bottom)
 
 #ifdef PLATFORM_POSIX
 
-void SetDesktopWallPaper(const char *path)
-{
+void SetDesktopWallPaper(const char *path) {
 	String desktopManager = GetDesktopManagerNew();
 	
 	if (desktopManager == "gnome") {
@@ -2080,8 +1947,7 @@ void SetDesktopWallPaper(const char *path)
 
 #if defined(PLATFORM_WIN32) || defined (PLATFORM_WIN64)
 
-void SetDesktopWallPaper(char *path)
-{
+void SetDesktopWallPaper(char *path) {
     if (0 == SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, static_cast<LPVOID>(path), SPIF_UPDATEINIFILE|SPIF_SENDWININICHANGE))
         throw Exc(String(t_("Impossible to change Desktop bitmap")) + ": " + AsString(GetLastError()));
 }
@@ -2128,9 +1994,6 @@ bool Serial_Check(String hdSerial, String other_hdSerial) {
 				
 
 bool SystemSignature::operator==(const SystemSignature &other) const {
-//	if (!(manufacturer == other.manufacturer && productName == other.productName))
-//		return false;		// Manufacturers do change manufacturer name and product name...
-
 	if (!(mbSerial == other.mbSerial && 
 		  numberOfProcessors == other.numberOfProcessors && 
 		  userName == other.userName))

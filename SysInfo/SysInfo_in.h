@@ -80,6 +80,13 @@
 #include "OSwin.h"
 #endif
 
+extern int bm_YEAR;
+extern int bm_MONTH;
+extern int bm_DAY;
+extern int bm_HOUR;
+extern int bm_MINUTE;
+extern int bm_SECOND;
+
 namespace Upp {
 
 #if defined(__GNUC__) && !defined(COMPILER_CLANG)

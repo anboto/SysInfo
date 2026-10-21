@@ -124,8 +124,7 @@ int64 GetProcessId();
 
 bool Shutdown(String action);
 
-void GetCompilerInfoAux(String &name, int &version, Upp::Time &time, String &mode, int &bits, const char *sdate, const char *stime);
-#define GetCompilerInfo(name, version, time, mode, bits) 	GetCompilerInfoAux(name, version, time, mode, bits, __DATE__, __TIME__)
+void GetCompilerInfo(String &name, int &version, Upp::Time &time, String &mode, int &bits);
 
 bool GetBatteryStatus(bool &discharging, int &percentage, int &remainingMin);
 bool GetBatteryInfo(bool &present/*, int &designCapacity, int &lastFullCapacity, String &vendor, String &type, String &model, String &serial*/);	
