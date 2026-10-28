@@ -235,7 +235,7 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 	
 	String sfolder(folder);
 	if (!DirectoryExists(sfolder)) {
-		sfolder = AppendFileNameX(GetAppDataFolder(), folder);
+		sfolder = GetAppDataFolder() / folder;
 		RealizeDirectory(sfolder);
 	}
 
@@ -248,7 +248,7 @@ bool ErrorMonitor::Init(const char *title, const char *folder, Function<bool(con
 		name = F("AnbotoWD%ld", GetParentProcessId());
 	}
 	
-	fileLog = AppendFileNameX(sfolder, name + ".log");
+	fileLog = sfolder / name + ".log";
 		
 	if (!isChild) {
 		SetEnv(name, "1");

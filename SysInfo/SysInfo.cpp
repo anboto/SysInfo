@@ -190,7 +190,7 @@ void GetSystemInfo(String &manufacturer, String &productName, String &version, i
 	if (manufacturer.IsEmpty()) 
 		manufacturer = FromSystemCharset(GetWinRegString("SystemManufacturer", "HARDWARE\\DESCRIPTION\\System\\BIOS", HKEY_LOCAL_MACHINE));
 	if (manufacturer.IsEmpty()) {
-		StringParse fileData = LoadFile(AppendFileNameX(GetSystemFolder(), "oeminfo.ini"));
+		StringParse fileData = LoadFile(GetSystemFolder() / "oeminfo.ini");
 		fileData.GoAfter("Manufacturer=");
 		manufacturer = fileData.GetText("\r\n");
 	}

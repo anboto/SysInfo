@@ -428,7 +428,7 @@ void ProcessList::ButUpdate_Push() {
 }
 
 void ScreenGrabTab::Fill() {
-	EditFileNameGrab <<= AppendFileNameX(GetDesktopFolder(), "ScreenGrab.avi");
+	EditFileNameGrab <<= GetDesktopFolder() / "ScreenGrab.avi";
 	EditTime <<= 5;
 	EditFrameRate <<= 1; 
 	OpGrabMouse <<= true;
@@ -448,7 +448,7 @@ void ScreenGrabTab::Fill() {
 	//OpGrabMouse.Enable(false);
 	
 	String extension = "jpg";
-	EditFileNameSnap <<= AppendFileNameX(GetDesktopFolder(), "ScreenSnap." + extension);
+	EditFileNameSnap <<= GetDesktopFolder() / "ScreenSnap." + extension;
 	ButSnap.WhenPush = THISBACK(ButSnap_Push);
 }
 
@@ -537,7 +537,7 @@ void MouseKeyboard::OnButLock() {
 }
 
 void MouseKeyboard::OnButKey() {
-	String fileTest = AppendFileNameX(GetExeFolder(), "test.txt");
+	String fileTest = GetExeFolder() / "test.txt";
 	SaveFile(fileTest, "Please wait a second...");
 	LaunchFile(fileTest);
 	{
